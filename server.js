@@ -12,12 +12,18 @@ const billRoutes = require("./routes/billRoutes");
 const app = express();
 
 
-app.use(
-  cors({
-    origin: process.env.FRONTEND_URL,
-    credentials: true,
-  })
-);
+// CORS setup
+const allowedOrigins = process.env.NODE_ENV === 'production'
+  ? [process.env.PROD_FRONTEND_URL] // actual site
+  : [process.env.DEV_FRONTEND_URL]; // local/dev
+
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true, 
+  // if you use cookies or auth headers
+}));
+
+
 app.use(express.json());
 
 
