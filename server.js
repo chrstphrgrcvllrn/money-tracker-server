@@ -8,6 +8,8 @@ const noteRoutes = require("./routes/noteRoutes");
 const loanRoutes = require("./routes/loanRoutes");
 const salaryRoutes = require("./routes/salaryRoutes");
 const billRoutes = require("./routes/billRoutes");
+const savingsRoutes = require("./routes/savingsRoutes");
+
 
 const app = express();
 
@@ -33,6 +35,7 @@ app.use("/api/notes", noteRoutes);
 app.use("/api/loans", loanRoutes);
 app.use("/api/salary", salaryRoutes);
 app.use("/api/bills", billRoutes);
+app.use("/api/savings", savingsRoutes);
 
 const PORT = process.env.PORT || 5000;
 
