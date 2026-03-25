@@ -1,16 +1,16 @@
 const express = require("express");
 const {
-  getMonthlyBills,
-  addBill,
-  updateBillStatus,
+  getBills,
+  createBill,
+  updateBill,
   deleteBill,
 } = require("../controllers/billController");
 
 const router = express.Router();
 
-router.get("/", getMonthlyBills);
-router.post("/:monthId/bills", addBill);
-router.patch("/:monthId/bills/:billId", updateBillStatus);
-router.delete("/:monthId/bills/:billId", deleteBill);
+router.get("/", getBills);
+router.post("/", createBill);
+router.put("/:id", updateBill);
+router.delete("/:id", deleteBill);
 
 module.exports = router;
