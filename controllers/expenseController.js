@@ -28,7 +28,29 @@ exports.createExpense = async (req, res) => {
   }
 };
 
-// TOGGLE
+// UPDATE (EDIT)
+exports.updateExpense = async (req, res) => {
+  try {
+    const { text, amount } = req.body;
+
+    const expense = await Expense.findById(req.params.id);
+
+    if (!expense) {
+      return res.status(404).json({ message: "Expense not found" });
+    }
+
+    expense.text = text ?? expense.text;
+    expense.amount = amount ?? expense.amount;
+
+    await expense.save();
+
+    res.json(expense);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to update expense" });
+  }
+};
+
+// TOGGLE DONE
 exports.toggleExpense = async (req, res) => {
   try {
     const expense = await Expense.findById(req.params.id);
@@ -46,7 +68,7 @@ exports.toggleExpense = async (req, res) => {
   }
 };
 
-// DELETE (optional)
+// DELETE
 exports.deleteExpense = async (req, res) => {
   try {
     const expense = await Expense.findByIdAndDelete(req.params.id);
