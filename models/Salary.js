@@ -11,9 +11,16 @@ const expenseSchema = new mongoose.Schema(
 
 const salarySchema = new mongoose.Schema(
   {
-    month: { type: String, required: true },
+    // ✅ match frontend
+    date: { type: String, required: true },
+
     salary: { type: Number, required: true },
-    expenses: [expenseSchema],
+
+    // ✅ prevent undefined crashes
+    expenses: {
+      type: [expenseSchema],
+      default: [],
+    },
   },
   { timestamps: true }
 );

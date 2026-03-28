@@ -2,33 +2,26 @@ const mongoose = require("mongoose");
 
 const transactionSchema = new mongoose.Schema(
   {
-    date: String,
+    date: {
+      type: String,
+      default: () => new Date().toISOString(),
+    },
     amount: {
       type: Number,
-      default: 0,
+      required: true,
     },
-    type: String,
+    type: {
+      type: String,
+      default: "payment", // "payment" | "deduction"
+    },
   },
-  { _id: false }
+  // { _id: false }
 );
 
-const loanSchema = new mongoose.Schema(
-  {
-    name: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    initialAmount: {
-      type: Number,
-      required: true,
-    },
-    transactions: {
-      type: [transactionSchema],
-      default: [],
-    },
-  },
-  { timestamps: true }
-);
+const loanSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  initialAmount: { type: Number, required: true },
+  transactions: { type: [transactionSchema], default: [] },
+}, { timestamps: true }); // <-- createdAt / updatedAt
 
 module.exports = mongoose.model("Loan", loanSchema);

@@ -8,16 +8,41 @@ const getSalaries = async (req, res) => {
 
 // CREATE salary (with optional expenses)
 const createSalary = async (req, res) => {
-  const data = await Salary.create(req.body);
-  res.json(data);
-};
+  try {
+    const { date, salary, expenses } = req.body;
 
+    if (!date || salary === undefined) {
+      return res.status(400).json({ message: "Date and salary are required" });
+    }
+
+    const newSalary = new Salary({
+      date,
+      salary,
+      expenses: Array.isArray(expenses) ? expenses : [], // ✅ safe fallback
+    });
+
+    await newSalary.save();
+
+    res.status(201).json(newSalary);
+  } catch (err) {
+    console.error("CREATE SALARY ERROR:", err); // ✅ this will expose the real issue
+    res.status(500).json({ message: err.message });
+  }
+};
 // UPDATE salary (basic fields like month/salary)
 const updateSalary = async (req, res) => {
-  const data = await Salary.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-  });
-  res.json(data);
+  try {
+    const data = await Salary.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
+
+    res.json(data);
+  } catch (err) {
+    console.error("UPDATE SALARY ERROR:", err);
+    res.status(500).json({ message: err.message });
+  }
 };
 
 // DELETE salary
