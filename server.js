@@ -21,9 +21,17 @@ const allowedOrigins = process.env.NODE_ENV === 'production'
   : [process.env.DEV_FRONTEND_URL]; // local/dev
 
 app.use(cors({
-  origin: allowedOrigins,
-  credentials: true, 
-  // if you use cookies or auth headers
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like Postman or server-to-server)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("CORS not allowed"));
+    }
+  },
+  credentials: true,
 }));
 
 
