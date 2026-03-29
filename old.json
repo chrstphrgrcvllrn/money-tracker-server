@@ -1,0 +1,155 @@
+[
+  {
+    "_id": "69c36bb00f221fd1c166cfff",
+    "text": "Dr. S Wong Sulfur Soap",
+    "amount": 68,
+    "done": true,
+    "createdAt": "2026-03-25T04:59:28.116Z",
+    "updatedAt": "2026-03-25T13:27:50.327Z",
+    "__v": 0
+  },
+  {
+    "_id": "69c37db40f221fd1c166d182",
+    "text": "Load - Go250",
+    "amount": 250,
+    "done": true,
+    "createdAt": "2026-03-25T06:16:20.213Z",
+    "updatedAt": "2026-03-25T13:27:47.296Z",
+    "__v": 0
+  },
+  {
+    "_id": "69c38bff0dd0ce816022c86d",
+    "text": "Roller Shoes (Piyang)",
+    "amount": 800,
+    "done": true,
+    "createdAt": "2026-03-25T07:17:19.545Z",
+    "updatedAt": "2026-03-25T13:27:45.112Z",
+    "__v": 0
+  },
+  {
+    "_id": "69c3c0c00dd0ce816022ca11",
+    "text": "Gasoline 2.2liters",
+    "amount": 200,
+    "done": true,
+    "createdAt": "2026-03-25T11:02:24.435Z",
+    "updatedAt": "2026-03-25T13:27:37.323Z",
+    "__v": 0
+  },
+  {
+    "_id": "69c488080dd0ce816022cc64",
+    "text": "pacheck up calcheese",
+    "amount": 1000,
+    "done": true,
+    "createdAt": "2026-03-26T01:12:40.282Z",
+    "updatedAt": "2026-03-27T03:40:20.456Z",
+    "__v": 0
+  },
+  {
+    "_id": "69c772fa0dd0ce816022d489",
+    "text": "Table tennis (Siomai, mineral, ken 50)",
+    "amount": 150,
+    "done": true,
+    "createdAt": "2026-03-28T06:19:38.188Z",
+    "updatedAt": "2026-03-28T11:50:37.463Z",
+    "__v": 0
+  },
+  {
+    "_id": "69c7b9900dd0ce816022d510",
+    "text": "Halo-Halo sa mambog",
+    "amount": 50,
+    "done": true,
+    "createdAt": "2026-03-28T11:20:48.079Z",
+    "updatedAt": "2026-03-28T11:50:38.412Z",
+    "__v": 0
+  },
+  {
+    "_id": "69c7b9f20dd0ce816022d513",
+    "text": "Kwek Kwek at Palamig",
+    "amount": 50,
+    "done": true,
+    "createdAt": "2026-03-28T11:22:26.219Z",
+    "updatedAt": "2026-03-28T11:50:39.599Z",
+    "__v": 0
+  },
+  {
+    "_id": "69c7ba000dd0ce816022d516",
+    "text": "Potato Fries",
+    "amount": 67,
+    "done": true,
+    "createdAt": "2026-03-28T11:22:40.773Z",
+    "updatedAt": "2026-03-28T11:50:40.370Z",
+    "__v": 0
+  },
+  {
+    "_id": "69c7ba150dd0ce816022d519",
+    "text": "Buko With Milk",
+    "amount": 40,
+    "done": true,
+    "createdAt": "2026-03-28T11:23:01.071Z",
+    "updatedAt": "2026-03-28T11:50:41.153Z",
+    "__v": 0
+  },
+  {
+    "_id": "69c7dfa9653c44689568d1b3",
+    "text": "Seat cover - Tatay",
+    "amount": 320,
+    "done": true,
+    "createdAt": "2026-03-28T14:03:21.060Z",
+    "updatedAt": "2026-03-29T08:17:46.993Z",
+    "__v": 0
+  },
+  {
+    "_id": "69c8895c653c44689568d1e8",
+    "text": "Natividad Tanay Viewpoint Garden Restaurant",
+    "amount": 2461,
+    "done": true,
+    "createdAt": "2026-03-29T02:07:24.204Z",
+    "updatedAt": "2026-03-29T12:05:11.241Z",
+    "__v": 0
+  },
+  {
+    "_id": "69c8e046653c44689568d2f7",
+    "text": "Gasoline - Morong",
+    "amount": 254,
+    "done": true,
+    "createdAt": "2026-03-29T08:18:14.236Z",
+    "updatedAt": "2026-03-29T12:05:12.912Z",
+    "__v": 0
+  },
+  {
+    "_id": "69c8fac3653c44689568d3df",
+    "text": "Ice cream",
+    "amount": 25,
+    "done": true,
+    "createdAt": "2026-03-29T10:11:15.900Z",
+    "updatedAt": "2026-03-29T12:05:14.940Z",
+    "__v": 0
+  },
+  {
+    "_id": "69c9120d653c44689568d45d",
+    "text": "Elceflora (3x)",
+    "amount": 150,
+    "done": true,
+    "createdAt": "2026-03-29T11:50:37.226Z",
+    "updatedAt": "2026-03-29T12:05:16.597Z",
+    "__v": 0
+  },
+  {
+    "_id": "69c929138b8941cca223a8a0",
+    "text": "Alfamart with Roy",
+    "amount": 351,
+    "done": false,
+    "createdAt": "2026-03-27T11:50:37.226Z",
+    "updatedAt": "2026-03-27T12:05:16.597Z",
+    "__v": 0
+  },
+  {
+    "_id": "69c932e1653c44689568d728",
+    "text": "shanen",
+    "amount": 1,
+    "done": false,
+    "createdAt": "2026-03-29T14:10:41.185Z",
+    "updatedAt": "2026-03-29T14:10:41.185Z",
+    "__v": 0
+  }
+]
