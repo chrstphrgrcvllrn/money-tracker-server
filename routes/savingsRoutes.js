@@ -5,6 +5,7 @@ const {
   getSavings,
   createSavings,
   addTransaction,
+  deleteSavings,
 } = require("../controllers/savingController");
 
 // GET all
@@ -15,5 +16,10 @@ router.post("/", createSavings);
 
 // ADD transaction
 router.post("/:id/transactions", addTransaction);
+
+
+// DELETE savings
+router.delete("/:id", deleteSavings);
+
 
 module.exports = router;
