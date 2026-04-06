@@ -10,6 +10,8 @@ const salaryRoutes = require("./routes/salaryRoutes");
 const billRoutes = require("./routes/billRoutes");
 const savingsRoutes = require("./routes/savingsRoutes");
 const expenseRoutes = require("./routes/expenseRoutes");
+const exerciseRoutes = require("./routes/exerciseRoutes.js");
+
 
 
 const app = express();
@@ -46,6 +48,7 @@ app.use("/api/salary", salaryRoutes);
 app.use("/api/bills", billRoutes);
 app.use("/api/savings", savingsRoutes);
 app.use("/api/expenses", expenseRoutes);
+app.use("/api/exercise", exerciseRoutes);
 
 
 
