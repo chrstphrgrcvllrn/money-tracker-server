@@ -10,6 +10,11 @@ const watchSchema = new mongoose.Schema(
       enum: ["ongoing", "completed"],
       default: "ongoing",
     },
+    // NEW
+    link: {
+      type: String,
+      default: "",
+    },
   },
   { timestamps: true }
 );

@@ -13,10 +13,18 @@ const getWatchlist = async (req, res) => {
 // CREATE
 const createWatchItem = async (req, res) => {
   try {
-    const { title, current, nextRelease, status } = req.body;
+    const {
+      title,
+      current,
+      nextRelease,
+      status,
+      link, // NEW
+    } = req.body;
 
     if (!title) {
-      return res.status(400).json({ message: "Title is required" });
+      return res.status(400).json({
+        message: "Title is required",
+      });
     }
 
     const newItem = await Watch.create({
@@ -24,35 +32,44 @@ const createWatchItem = async (req, res) => {
       current,
       nextRelease,
       status,
+      link, // NEW
     });
 
     res.status(201).json(newItem);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({
+      message: err.message,
+    });
   }
 };
 
-// UPDATE (THIS POWERS YOUR EDIT FEATURE)
+// UPDATE
 const updateWatchItem = async (req, res) => {
   try {
     const { id } = req.params;
 
     const updated = await Watch.findByIdAndUpdate(
       id,
-      req.body,
       {
-        new: true,      // return updated doc
+        ...req.body,
+      },
+      {
+        new: true,
         runValidators: true,
       }
     );
 
     if (!updated) {
-      return res.status(404).json({ message: "Not found" });
+      return res.status(404).json({
+        message: "Not found",
+      });
     }
 
     res.json(updated);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({
+      message: err.message,
+    });
   }
 };
 
@@ -64,12 +81,16 @@ const deleteWatchItem = async (req, res) => {
     const deleted = await Watch.findByIdAndDelete(id);
 
     if (!deleted) {
-      return res.status(404).json({ message: "Not found" });
+      return res.status(404).json({
+        message: "Not found",
+      });
     }
 
     res.json(deleted);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({
+      message: err.message,
+    });
   }
 };
 
