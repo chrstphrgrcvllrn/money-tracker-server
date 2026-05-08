@@ -13,6 +13,7 @@ const expenseRoutes = require("./routes/expenseRoutes");
 const exerciseRoutes = require("./routes/exerciseRoutes.js");
 const thoughtRoutes = require("./routes/thoughtRoutes");
 const watchRoutes = require("./routes/watchlistRoutes");
+const subscriptionRoutes = require("./routes/subscriptionRoutes");
 
 
 const app = express();
@@ -52,6 +53,7 @@ app.use("/api/expenses", expenseRoutes);
 app.use("/api/exercise", exerciseRoutes);
 app.use("/api/thoughts", thoughtRoutes);
 app.use("/api/watchlist", watchRoutes);
+app.use("/api/subscription", subscriptionRoutes);
 
 
 const PORT = process.env.PORT || 5000;
