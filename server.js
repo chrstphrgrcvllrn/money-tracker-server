@@ -19,6 +19,11 @@ const calendarRoutes = require("./routes/calendarRoutes.js");
 const app = express();
 
 
+// console.log("NODE_ENV:", process.env.NODE_ENV);
+// console.log("DEV_FRONTEND_URL:", process.env.DEV_FRONTEND_URL);
+// console.log("PROD_FRONTEND_URL:", process.env.PROD_FRONTEND_URL);
+
+
 // CORS setup
 const allowedOrigins = process.env.NODE_ENV === 'production'
   ? [process.env.PROD_FRONTEND_URL] // actual site
