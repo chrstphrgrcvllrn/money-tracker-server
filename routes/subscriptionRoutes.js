@@ -6,13 +6,17 @@ const {
   getSubscriptions,
   updateSubscription,
   deleteSubscription,
-  updatePayment
+  updatePayment,
+  createPayment,
 } = require("../controllers/subscriptionController");
 
 router.get("/", getSubscriptions);
 router.post("/", createSubscription);
 router.put("/:id", updateSubscription);
 router.delete("/:id", deleteSubscription);
+
+// payments
+router.post("/:id/payment", createPayment);
 router.patch("/payment", updatePayment);
 
 module.exports = router;

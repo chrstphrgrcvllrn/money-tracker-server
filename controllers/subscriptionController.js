@@ -1,30 +1,8 @@
 const Subscription = require("../models/Subscription");
 
-// generate next 12 cycles from NOW
-const generatePayments = (amount, billing, startDate) => {
-  const payments = [];
-  const base = new Date(startDate);
-
-  for (let i = 0; i < 12; i++) {
-    const date = new Date(base);
-
-    if (billing === "monthly") {
-      date.setMonth(base.getMonth() + i);
-    } else {
-      date.setFullYear(base.getFullYear() + i);
-    }
-
-    payments.push({
-      date,
-      amount,
-      status: "pending",
-    });
-  }
-
-  return payments;
-};
-
-// CREATE
+// =========================
+// CREATE SUBSCRIPTION
+// =========================
 const createSubscription = async (req, res) => {
   try {
     const { name, amount, billing, type, startDate } = req.body;
@@ -34,10 +12,7 @@ const createSubscription = async (req, res) => {
       amount,
       billing,
       type,
-      payments:
-        type === "auto"
-          ? generatePayments(amount, billing, startDate)
-          : [],
+      payments: [],
     });
 
     res.status(201).json(subscription);
@@ -46,42 +21,94 @@ const createSubscription = async (req, res) => {
   }
 };
 
-// READ
+// =========================
+// CREATE PAYMENT
+// =========================
+const createPayment = async (req, res) => {
+  try {
+    const subId = req.params.id;
+    const { date, amount, status } = req.body;
+
+    if (!subId || !date || !amount) {
+      return res.status(400).json({
+        message: "subId, date, amount required",
+      });
+    }
+
+    const sub = await Subscription.findById(subId);
+    if (!sub) {
+      return res.status(404).json({ message: "Subscription not found" });
+    }
+
+    const newPayment = {
+      date: new Date(date),
+      amount: Number(amount),
+      status: status || "pending",
+    };
+
+    sub.payments.push(newPayment);
+
+    await sub.save();
+
+    res.status(201).json(sub);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
+
+// =========================
+// GET
+// =========================
 const getSubscriptions = async (_, res) => {
   const data = await Subscription.find().sort({ createdAt: -1 });
   res.json(data);
 };
 
-// UPDATE
+// =========================
+// UPDATE SUBSCRIPTION
+// =========================
 const updateSubscription = async (req, res) => {
   const updated = await Subscription.findByIdAndUpdate(
     req.params.id,
     req.body,
     { new: true }
   );
+
   res.json(updated);
 };
 
+// =========================
 // DELETE
+// =========================
 const deleteSubscription = async (req, res) => {
   await Subscription.findByIdAndDelete(req.params.id);
   res.json({ message: "deleted" });
 };
 
+// =========================
+// UPDATE PAYMENT
+// =========================
 const updatePayment = async (req, res) => {
   try {
     const { subId, paymentId, date, status } = req.body;
 
+    if (!subId || !paymentId) {
+      return res.status(400).json({
+        message: "subId and paymentId required",
+      });
+    }
+
     const sub = await Subscription.findById(subId);
+    if (!sub) {
+      return res.status(404).json({ message: "Subscription not found" });
+    }
 
     const payment = sub.payments.id(paymentId);
-
     if (!payment) {
       return res.status(404).json({ message: "Payment not found" });
     }
 
-    // allow full edit
-    if (date) payment.date = date;
+    if (date) payment.date = new Date(date);
     if (status) payment.status = status;
 
     await sub.save();
@@ -97,5 +124,6 @@ module.exports = {
   getSubscriptions,
   updateSubscription,
   deleteSubscription,
-  updatePayment
+  updatePayment,
+  createPayment,
 };
