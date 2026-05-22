@@ -9,19 +9,10 @@ const {
   deleteExpense,
 } = require("../controllers/expenseController");
 
-// GET all
 router.get("/", getExpenses);
-
-// CREATE
 router.post("/", createExpense);
-
-// UPDATE
 router.put("/:id", updateExpense);
-
-// TOGGLE
 router.patch("/:id/toggle", toggleExpense);
-
-// DELETE
 router.delete("/:id", deleteExpense);
 
 module.exports = router;
