@@ -22,16 +22,19 @@ const createExpense = async (req, res) => {
 
 // UPDATE
 const updateExpense = async (req, res) => {
-  const { text, amount, category } = req.body;
+  const updateData = {};
+
+  if (req.body.text !== undefined) updateData.text = req.body.text;
+  if (req.body.amount !== undefined) updateData.amount = req.body.amount;
+  if (req.body.category !== undefined) updateData.category = req.body.category;
 
   const expense = await Expense.findByIdAndUpdate(
     req.params.id,
+    { $set: updateData },
     {
-      text,
-      amount,
-      category, // 👈 THIS WAS MISSING
-    },
-    { new: true }
+      new: true, // use this OR returnDocument
+      runValidators: true,
+    }
   );
 
   res.json(expense);
