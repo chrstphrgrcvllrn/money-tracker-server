@@ -22,6 +22,7 @@ const loanSchema = new mongoose.Schema({
   name: { type: String, required: true },
   initialAmount: { type: Number, required: true },
   transactions: { type: [transactionSchema], default: [] },
+  archived: { type: Boolean, default: false },
 }, { timestamps: true }); // <-- createdAt / updatedAt
 
 module.exports = mongoose.model("Loan", loanSchema);

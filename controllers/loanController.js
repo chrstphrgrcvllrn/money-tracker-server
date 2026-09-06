@@ -88,8 +88,36 @@ const addTransaction = async (req, res) => {
 };
 
 
+// UPDATE loan (e.g. archive/unarchive, rename, edit amount)
+const updateLoan = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updateData = {};
+
+    if (req.body.name !== undefined) updateData.name = req.body.name;
+    if (req.body.initialAmount !== undefined) updateData.initialAmount = Number(req.body.initialAmount);
+    if (req.body.archived !== undefined) updateData.archived = Boolean(req.body.archived);
+
+    const loan = await Loan.findByIdAndUpdate(
+      id,
+      { $set: updateData },
+      { new: true, runValidators: true }
+    );
+
+    if (!loan) {
+      return res.status(404).json({ message: "Loan not found" });
+    }
+
+    res.status(200).json(loan);
+  } catch (error) {
+    console.error("UPDATE LOAN ERROR:", error);
+    res.status(500).json({ message: "Failed to update loan" });
+  }
+};
+
 module.exports = {
   getLoans,
   createLoan,
   addTransaction,
+  updateLoan,
 };

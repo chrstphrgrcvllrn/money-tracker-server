@@ -17,6 +17,7 @@ const subscriptionRoutes = require("./routes/subscriptionRoutes");
 const calendarRoutes = require("./routes/calendarRoutes.js");
 const houseExpenseRoutes = require("./routes/houseExpenseRoutes");
 const notebookRoutes = require("./routes/notebookRoutes");
+const trackerRoutes = require("./routes/trackerRoutes");
 
 const app = express();
 
@@ -63,6 +64,7 @@ app.use("/api/watchlist", watchRoutes);
 app.use("/api/subscription", subscriptionRoutes);
 app.use("/api/house-expenses", houseExpenseRoutes);
 app.use("/api/notebook", notebookRoutes);
+app.use("/api/tracker", trackerRoutes);
 
 
 const PORT = process.env.PORT || 5000;
