@@ -16,6 +16,8 @@ const subscriptionSchema = new mongoose.Schema(
   {
     name: String,
     amount: Number,
+    quantity: { type: Number, default: 1 },
+    completed: { type: Boolean, default: false },
     billing: {
       type: String,
       enum: ["monthly", "yearly"],

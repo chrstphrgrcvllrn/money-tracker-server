@@ -5,11 +5,13 @@ const Subscription = require("../models/Subscription");
 // =========================
 const createSubscription = async (req, res) => {
   try {
-    const { name, amount, billing, type, startDate } = req.body;
+    const { name, amount, quantity, completed, billing, type } = req.body;
 
     const subscription = await Subscription.create({
       name,
       amount,
+      quantity: quantity || 1,
+      completed: completed || false,
       billing,
       type,
       payments: [],
