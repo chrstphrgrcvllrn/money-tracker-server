@@ -14,7 +14,7 @@ const getTrackerEntries = async (req, res) => {
 // CREATE tracker entry
 const createTrackerEntry = async (req, res) => {
   try {
-    const { category, name, details, date, amount, notes } = req.body;
+    const { category, name, details, date, amount, price, notes } = req.body;
 
     if (!category || !name || !date) {
       return res.status(400).json({ message: "Missing required fields" });
@@ -26,6 +26,7 @@ const createTrackerEntry = async (req, res) => {
       details: details || "",
       date,
       amount: Number(amount) || 0,
+      price: Number(price) || 0,
       notes: notes || "",
     });
 
@@ -40,7 +41,7 @@ const createTrackerEntry = async (req, res) => {
 const updateTrackerEntry = async (req, res) => {
   try {
     const updateData = {};
-    const fields = ["category", "name", "details", "date", "amount", "notes"];
+    const fields = ["category", "name", "details", "date", "amount", "price", "notes"];
 
     fields.forEach((field) => {
       if (req.body[field] !== undefined) updateData[field] = req.body[field];
