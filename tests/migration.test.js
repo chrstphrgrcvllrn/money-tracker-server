@@ -105,7 +105,7 @@ test("is idempotent: a second run updates nothing and doesn't touch the owner's 
   await migrate({ dryRun: false, ownerUsername: OWNER, ownerPassword: OWNER_PASSWORD, log: quiet });
   const owner = await User.findOne({ username: OWNER }).select("+passwordHash");
 
-  const second = await migrate({ dryRun: false, ownerUsername: OWNER, ownerPassword: "a-different-password", log: quiet });
+  const second = await migrate({ dryRun: false, ownerUsername: OWNER, ownerPassword: OWNER_PASSWORD, log: quiet });
 
   expect(second.ownerCreated).toBe(false);
   expect(second.collections.every((c) => c.updated === 0 && c.ownerless === 0)).toBe(true);
@@ -125,9 +125,82 @@ test("never reassigns documents that already have an owner", async () => {
   expect(String(theirs.userId)).toBe(other.user.id);
 });
 
-test("needs a password only when the owner account must be created", async () => {
+test("a real run needs the password, both to create the account and to prove an existing one is yours", async () => {
   await expect(migrate({ dryRun: false, ownerUsername: OWNER, log: quiet })).rejects.toThrow(/MIGRATION_OWNER_PASSWORD/);
   expect(await User.countDocuments()).toBe(0);
+
+  await registerUser(app, OWNER, "someone-elses-pass"); // account already exists
+  await expect(migrate({ dryRun: false, ownerUsername: OWNER, log: quiet })).rejects.toThrow(/prove/);
+});
+
+test("REFUSES to hand data to an existing account whose password doesn't match (someone registered the username first)", async () => {
+  await seedLegacy();
+  const before = await totalDocs();
+  const stranger = await registerUser(app, OWNER, "strangers-password");
+
+  await expect(
+    migrate({ dryRun: false, ownerUsername: OWNER, ownerPassword: OWNER_PASSWORD, log: quiet })
+  ).rejects.toThrow(/does not match/);
+
+  // nothing was assigned to the stranger, and nothing changed at all
+  for (const name of Object.keys(LEGACY)) {
+    expect(await col(name).countDocuments({ userId: { $exists: true } })).toBe(0);
+  }
+  expect(await totalDocs()).toEqual(before);
+  expect(String((await User.findOne({ username: OWNER }))._id)).toBe(stranger.user.id);
+});
+
+test("a dry run against an existing account needs no password (it changes nothing)", async () => {
+  await seedLegacy();
+  await registerUser(app, OWNER, "whatever-pass");
+
+  const result = await migrate({ dryRun: true, ownerUsername: OWNER, log: quiet });
+  expect(result.collections.find((c) => c.collection === "Thought").ownerless).toBe(2);
+});
+
+describe("boot-time runner (MIGRATE_ON_BOOT)", () => {
+  const { runBootMigration } = require("../scripts/run-boot-migration");
+
+  test("does nothing unless a mode is set", async () => {
+    await seedLegacy();
+    const result = await runBootMigration({ ownerUsername: OWNER, ownerPassword: OWNER_PASSWORD, log: quiet });
+
+    expect(result).toEqual({ ran: false });
+    expect(await User.countDocuments()).toBe(0);
+    expect(await col("thoughts").countDocuments({ userId: { $exists: true } })).toBe(0);
+  });
+
+  test("dry-run logs the counts and changes nothing", async () => {
+    await seedLegacy();
+    const lines = [];
+    await runBootMigration({ mode: "dry-run", ownerUsername: OWNER, ownerPassword: OWNER_PASSWORD, log: (l) => lines.push(l) });
+
+    expect(await User.countDocuments()).toBe(0);
+    expect(await col("thoughts").countDocuments({ userId: { $exists: true } })).toBe(0);
+    expect(lines.join("\n")).toMatch(/\[boot migration\].*Thought/);
+    expect(lines.join("\n")).not.toContain(OWNER_PASSWORD);
+  });
+
+  test("run assigns everything to the owner", async () => {
+    await seedLegacy();
+    await runBootMigration({ mode: "run", ownerUsername: OWNER, ownerPassword: OWNER_PASSWORD, log: quiet });
+
+    const owner = await User.findOne({ username: OWNER });
+    expect(await col("thoughts").countDocuments({ userId: owner._id })).toBe(2);
+    expect(await col("loans").countDocuments({ userId: { $exists: false } })).toBe(0);
+  });
+
+  test("never throws: a refused or failed migration is logged and the server keeps going", async () => {
+    await seedLegacy();
+    await registerUser(app, OWNER, "strangers-password");
+    const lines = [];
+
+    const result = await runBootMigration({ mode: "run", ownerUsername: OWNER, ownerPassword: OWNER_PASSWORD, log: (l) => lines.push(l) });
+
+    expect(result.error).toMatch(/does not match/);
+    expect(lines.join("\n")).toMatch(/FAILED/);
+    expect(await col("thoughts").countDocuments({ userId: { $exists: true } })).toBe(0);
+  });
 });
 
 test("end to end: the owner logs in and sees the legacy data; a new user starts empty", async () => {

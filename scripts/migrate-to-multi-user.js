@@ -11,8 +11,10 @@
  *                              never hardcoded, never printed
  *
  * What it does:
- *   1. Finds or creates the owner account (an existing account is left exactly
- *      as it is: its password is NOT changed).
+ *   1. Finds or creates the owner account. An existing account is left exactly
+ *      as it is (its password is NOT changed), but its password must match
+ *      MIGRATION_OWNER_PASSWORD or the run is refused, so data can't be handed
+ *      to an account someone else registered first.
  *   2. Sets userId = owner on every document that has no owner, in every
  *      user-owned collection. Documents that already have an owner are never
  *      touched. It does not delete or rewrite anything else.
@@ -63,7 +65,7 @@ const loadModels = () => ({
 const migrate = async ({ dryRun = false, ownerUsername, ownerPassword, log = console.log }) => {
   ensureConfig();
   const User = require("../models/User");
-  const { hashPassword } = require("../utils/password");
+  const { hashPassword, verifyPassword } = require("../utils/password");
   const models = loadModels();
 
   if (!ownerUsername) throw new Error("MIGRATION_OWNER_USERNAME is required");
@@ -77,6 +79,24 @@ const migrate = async ({ dryRun = false, ownerUsername, ownerPassword, log = con
 
   if (owner) {
     log(`Owner "${username}" already exists (id ${owner._id}); leaving the account as is.`);
+
+    // Registration is open, so anyone could have taken this username before the
+    // migration ran. Only hand the data over if the caller proves they own the
+    // existing account by supplying its password.
+    if (!dryRun) {
+      if (!ownerPassword) {
+        throw new Error(
+          `User "${username}" already exists. MIGRATION_OWNER_PASSWORD is required to prove it's your account before data is assigned to it.`
+        );
+      }
+      const withHash = await User.findById(owner._id).select("+passwordHash");
+      if (!(await verifyPassword(ownerPassword, withHash.passwordHash))) {
+        throw new Error(
+          `User "${username}" already exists but MIGRATION_OWNER_PASSWORD does not match its password. ` +
+            "Refusing to assign your data to an account you may not control. Nothing was changed."
+        );
+      }
+    }
   } else if (dryRun) {
     log(`Owner "${username}" does not exist; would create it.`);
   } else {

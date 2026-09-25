@@ -23,6 +23,12 @@ const schema = z.object({
   // "none" is required when the site and the API are on different domains.
   COOKIE_SAME_SITE: z.enum(["strict", "lax", "none"]).optional(),
 
+  // One-time migration run at server start (see scripts/run-boot-migration.js).
+  // Leave unset in normal operation. "dry-run" only reports; "run" assigns.
+  MIGRATE_ON_BOOT: z.enum(["dry-run", "run"]).optional(),
+  MIGRATION_OWNER_USERNAME: z.string().optional(),
+  MIGRATION_OWNER_PASSWORD: z.string().optional(),
+
   BCRYPT_COST: z.coerce.number().int().min(4).max(15).default(12),
   AUTH_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(10),
 });
@@ -66,6 +72,11 @@ const env = {
   refreshCookie: {
     sameSite: raw.COOKIE_SAME_SITE ?? (isProduction ? "none" : "lax"),
     secure: isProduction,
+  },
+  migration: {
+    mode: raw.MIGRATE_ON_BOOT,
+    ownerUsername: raw.MIGRATION_OWNER_USERNAME,
+    ownerPassword: raw.MIGRATION_OWNER_PASSWORD,
   },
   bcryptCost: raw.BCRYPT_COST,
   authRateLimitMax: raw.AUTH_RATE_LIMIT_MAX,

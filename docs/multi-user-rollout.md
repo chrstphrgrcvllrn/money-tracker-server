@@ -44,6 +44,21 @@ Then:
 Run it twice if you like: the second run reports 0 updated. Afterwards remove
 `MIGRATION_OWNER_PASSWORD` from `.env`.
 
+### 3b. Can't reach the database from your machine? Run it inside Railway
+Set these variables on the API service in Railway (they're temporary):
+
+    MIGRATION_OWNER_USERNAME=chrstphrvllrn
+    MIGRATION_OWNER_PASSWORD=<the password you want for that account>
+    MIGRATE_ON_BOOT=dry-run
+
+Railway redeploys. In the deploy logs look for lines starting `[boot migration]`:
+a table of documents per collection and how many have no owner. Nothing is
+changed in dry-run. Then change `MIGRATE_ON_BOOT` to `run`; on the next deploy
+the log shows the updated counts and "Migration complete". Then DELETE all
+three variables. The migration refuses to run if the username already exists
+with a different password (so nobody can register that name first and receive
+your data).
+
 ## 4. Deploy, server first, then client
 - Merge `multi-user` in both repos and deploy. The old client stops working the
   moment the new server is live (every data route needs a login), so deploy the
