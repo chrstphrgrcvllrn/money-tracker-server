@@ -8,12 +8,13 @@ const getHouseExpenses = async (req, res) => {
 
 // CREATE
 const createHouseExpense = async (req, res) => {
-  const { text, amount, category } = req.body;
+  const { text, amount, category, borrowedBy } = req.body;
 
   const expense = await HouseExpense.create({
     text,
     amount,
     category: category || "other",
+    borrowedBy: borrowedBy || "",
     done: false,
   });
 
@@ -27,6 +28,7 @@ const updateHouseExpense = async (req, res) => {
   if (req.body.text !== undefined) updateData.text = req.body.text;
   if (req.body.amount !== undefined) updateData.amount = req.body.amount;
   if (req.body.category !== undefined) updateData.category = req.body.category;
+  if (req.body.borrowedBy !== undefined) updateData.borrowedBy = req.body.borrowedBy;
 
   const expense = await HouseExpense.findByIdAndUpdate(
     req.params.id,

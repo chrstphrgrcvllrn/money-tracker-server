@@ -18,6 +18,13 @@ const houseExpenseSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    // Name of who borrowed this money from the house budget ("" = a normal
+    // expense). A negative amount on a borrowed entry records a repayment.
+    borrowedBy: {
+      type: String,
+      default: "",
+      trim: true,
+    },
   },
   { timestamps: true }
 );
