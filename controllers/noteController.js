@@ -3,11 +3,11 @@ const Note = require("../models/Note");
 // GET all notes
 const getNotes = async (req, res) => {
   try {
-    const notes = await Note.find();
+    const notes = await Note.findOwned(req.user.id);
     res.json(notes);
   } catch (error) {
-    console.error("Get notes error:", error);
-    res.status(500).json({ message: "Server error", error: error.message });
+    console.error("Get notes error:", error.message);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -19,24 +19,18 @@ const createNote = async (req, res) => {
       return res.status(400).json({ message: "Text and category are required" });
     }
 
-    const note = await Note.create({ text, category, done: false });
+    const note = await Note.createOwned(req.user.id, { text, category, done: false });
     res.status(201).json(note);
   } catch (error) {
-    console.error("Create note error:", error);
-    res.status(500).json({ message: "Server error", error: error.message });
+    console.error("Create note error:", error.message);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
 // TOGGLE note done status safely
 const toggleNote = async (req, res) => {
-  const { id } = req.params;
-
   try {
-    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
-      return res.status(400).json({ message: "Invalid note ID" });
-    }
-
-    const note = await Note.findById(id);
+    const note = await Note.findOneOwned(req.user.id, req.params.id);
     if (!note) return res.status(404).json({ message: "Note not found" });
 
     // Force done to boolean before toggling
@@ -45,27 +39,21 @@ const toggleNote = async (req, res) => {
     await note.save();
     res.json(note);
   } catch (error) {
-    console.error("Toggle note ERROR:", error);
-    res.status(500).json({ message: "Server error", error: error.message });
+    console.error("Toggle note ERROR:", error.message);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
 // DELETE a note
 const deleteNote = async (req, res) => {
-  const { id } = req.params;
-
   try {
-    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
-      return res.status(400).json({ message: "Invalid note ID" });
-    }
-
-    const note = await Note.findByIdAndDelete(id);
+    const note = await Note.deleteOwned(req.user.id, req.params.id);
     if (!note) return res.status(404).json({ message: "Note not found" });
 
     res.json({ message: "Deleted" });
   } catch (error) {
-    console.error("Delete note error:", error);
-    res.status(500).json({ message: "Server error", error: error.message });
+    console.error("Delete note error:", error.message);
+    res.status(500).json({ message: "Server error" });
   }
 };
 

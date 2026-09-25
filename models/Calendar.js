@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const userOwned = require("./plugins/userOwned");
 
 const CalendarSchema = new mongoose.Schema(
   {
@@ -26,6 +27,8 @@ const CalendarSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+CalendarSchema.plugin(userOwned);
 
 module.exports = mongoose.model(
   "Calendar",

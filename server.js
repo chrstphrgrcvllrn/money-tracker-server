@@ -1,76 +1,9 @@
-require("dotenv").config();
-const express = require("express");
-const cors = require("cors");
-
+const env = require("./config/env");
 const connectDB = require("./config/db");
-
-const noteRoutes = require("./routes/noteRoutes");
-const loanRoutes = require("./routes/loanRoutes");
-const salaryRoutes = require("./routes/salaryRoutes");
-const billRoutes = require("./routes/billRoutes");
-const savingsRoutes = require("./routes/savingsRoutes");
-const expenseRoutes = require("./routes/expenseRoutes");
-// const exerciseRoutes = require("./routes/exerciseRoutes.js");
-const thoughtRoutes = require("./routes/thoughtRoutes");
-const watchRoutes = require("./routes/watchlistRoutes");
-const subscriptionRoutes = require("./routes/subscriptionRoutes");
-const calendarRoutes = require("./routes/calendarRoutes.js");
-const houseExpenseRoutes = require("./routes/houseExpenseRoutes");
-const notebookRoutes = require("./routes/notebookRoutes");
-const trackerRoutes = require("./routes/trackerRoutes");
-const waterRoutes = require("./routes/waterRoutes");
-
-const app = express();
-
-
-// console.log("NODE_ENV:", process.env.NODE_ENV);
-// console.log("DEV_FRONTEND_URL:", process.env.DEV_FRONTEND_URL);
-// console.log("PROD_FRONTEND_URL:", process.env.PROD_FRONTEND_URL);
-
-
-// CORS setup
-const allowedOrigins = process.env.NODE_ENV === 'production'
-  ? [process.env.PROD_FRONTEND_URL] // actual site
-  : [process.env.DEV_FRONTEND_URL]; // local/dev
-
-app.use(cors({
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like Postman or server-to-server)
-    if (!origin) return callback(null, true);
-
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("CORS not allowed"));
-    }
-  },
-  credentials: true,
-}));
-
-
-app.use(express.json());
-
+const createApp = require("./app");
 
 connectDB();
 
-app.use("/api/notes", noteRoutes);
-app.use("/api/loans", loanRoutes);
-app.use("/api/salary", salaryRoutes);
-app.use("/api/bills", billRoutes);
-app.use("/api/savings", savingsRoutes);
-app.use("/api/expenses", expenseRoutes);
-app.use("/api/calendar-events", calendarRoutes);
-app.use("/api/thoughts", thoughtRoutes);
-app.use("/api/watchlist", watchRoutes);
-app.use("/api/subscription", subscriptionRoutes);
-app.use("/api/house-expenses", houseExpenseRoutes);
-app.use("/api/notebook", notebookRoutes);
-app.use("/api/tracker", trackerRoutes);
-app.use("/api/water", waterRoutes);
-
-
-const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+createApp().listen(env.port, () => {
+  console.log(`Server running on port ${env.port}`);
 });

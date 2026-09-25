@@ -1,9 +1,12 @@
 const Bills = require("../models/Bill");
+const pick = require("../utils/pick");
+
+const UPDATABLE = ["month", "bills"];
 
 // ✅ GET ALL
 const getBills = async (req, res) => {
   try {
-    const data = await Bills.find().sort({ createdAt: -1 });
+    const data = await Bills.findOwned(req.user.id).sort({ createdAt: -1 });
     res.json(data);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -15,12 +18,7 @@ const createBill = async (req, res) => {
   try {
     const { month, bills } = req.body;
 
-    const newEntry = new Bills({
-      month,
-      bills: bills || [],
-    });
-
-    const saved = await newEntry.save();
+    const saved = await Bills.createOwned(req.user.id, { month, bills: bills || [] });
     res.status(201).json(saved);
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -30,14 +28,11 @@ const createBill = async (req, res) => {
 // ✅ UPDATE
 const updateBill = async (req, res) => {
   try {
-    const { id } = req.params;
+    const updated = await Bills.updateOwned(req.user.id, req.params.id, {
+      $set: pick(req.body, UPDATABLE),
+    });
 
-    const updated = await Bills.findByIdAndUpdate(
-      id,
-      req.body,
-      { new: true }
-    );
-
+    if (!updated) return res.status(404).json({ message: "Not found" });
     res.json(updated);
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -47,9 +42,9 @@ const updateBill = async (req, res) => {
 // ✅ DELETE
 const deleteBill = async (req, res) => {
   try {
-    const { id } = req.params;
+    const deleted = await Bills.deleteOwned(req.user.id, req.params.id);
 
-    await Bills.findByIdAndDelete(id);
+    if (!deleted) return res.status(404).json({ message: "Not found" });
     res.json({ message: "Deleted successfully" });
   } catch (err) {
     res.status(500).json({ message: err.message });

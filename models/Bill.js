@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const userOwned = require("./plugins/userOwned");
 
 const billSchema = new mongoose.Schema({
   name: { type: String, required: true },
@@ -14,5 +15,7 @@ const billsEntrySchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+billsEntrySchema.plugin(userOwned);
 
 module.exports = mongoose.model("Bills", billsEntrySchema);

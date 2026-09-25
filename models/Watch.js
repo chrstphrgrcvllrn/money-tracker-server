@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const userOwned = require("./plugins/userOwned");
 
 const watchSchema = new mongoose.Schema(
   {
@@ -18,5 +19,7 @@ const watchSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+watchSchema.plugin(userOwned);
 
 module.exports = mongoose.model("Watch", watchSchema);

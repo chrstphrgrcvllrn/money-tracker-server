@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const userOwned = require("./plugins/userOwned");
 
 const noteSchema = new mongoose.Schema(
   {
@@ -8,5 +9,7 @@ const noteSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+noteSchema.plugin(userOwned);
 
 module.exports = mongoose.model("Note", noteSchema);

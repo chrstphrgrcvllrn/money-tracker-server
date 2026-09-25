@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const userOwned = require("./plugins/userOwned");
 
 const transactionSchema = new mongoose.Schema(
   {
@@ -17,5 +18,7 @@ const savingsSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+savingsSchema.plugin(userOwned);
 
 module.exports = mongoose.model("Savings", savingsSchema);

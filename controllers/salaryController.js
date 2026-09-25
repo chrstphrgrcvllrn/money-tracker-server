@@ -1,8 +1,12 @@
 const Salary = require("../models/Salary");
+const pick = require("../utils/pick");
+
+const SALARY_UPDATABLE = ["date", "salary", "expenses"];
+const EXPENSE_FIELDS = ["name", "amount", "paid"];
 
 // GET all salaries
 const getSalaries = async (req, res) => {
-  const data = await Salary.find();
+  const data = await Salary.findOwned(req.user.id);
   res.json(data);
 };
 
@@ -15,54 +19,52 @@ const createSalary = async (req, res) => {
       return res.status(400).json({ message: "Date and salary are required" });
     }
 
-    const newSalary = new Salary({
+    const newSalary = await Salary.createOwned(req.user.id, {
       date,
       salary,
       expenses: Array.isArray(expenses) ? expenses : [], // ✅ safe fallback
     });
 
-    await newSalary.save();
-
     res.status(201).json(newSalary);
   } catch (err) {
-    console.error("CREATE SALARY ERROR:", err); // ✅ this will expose the real issue
+    console.error("CREATE SALARY ERROR:", err.message);
     res.status(500).json({ message: err.message });
   }
 };
-// UPDATE salary (basic fields like month/salary)
+
+// UPDATE salary (basic fields like date/salary, or the expenses list)
 const updateSalary = async (req, res) => {
   try {
-    const data = await Salary.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
-    );
+    const data = await Salary.updateOwned(req.user.id, req.params.id, {
+      $set: pick(req.body, SALARY_UPDATABLE),
+    });
 
+    if (!data) return res.status(404).json({ message: "Not found" });
     res.json(data);
   } catch (err) {
-    console.error("UPDATE SALARY ERROR:", err);
+    console.error("UPDATE SALARY ERROR:", err.message);
     res.status(500).json({ message: err.message });
   }
 };
 
 // DELETE salary
 const deleteSalary = async (req, res) => {
-  await Salary.findByIdAndDelete(req.params.id);
+  const deleted = await Salary.deleteOwned(req.user.id, req.params.id);
+
+  if (!deleted) return res.status(404).json({ message: "Not found" });
   res.json({ message: "Deleted" });
 };
 
 //
-// ✅ EXPENSES
+// ✅ EXPENSES (owned through their parent salary)
 //
 
 // ADD expense
 const addExpense = async (req, res) => {
-  const { id } = req.params;
-
-  const salary = await Salary.findById(id);
+  const salary = await Salary.findOneOwned(req.user.id, req.params.id);
   if (!salary) return res.status(404).json({ message: "Not found" });
 
-  salary.expenses.push(req.body);
+  salary.expenses.push(pick(req.body, EXPENSE_FIELDS));
 
   await salary.save();
 
@@ -73,7 +75,7 @@ const addExpense = async (req, res) => {
 const updateExpense = async (req, res) => {
   const { id, expenseId } = req.params;
 
-  const salary = await Salary.findById(id);
+  const salary = await Salary.findOneOwned(req.user.id, id);
   if (!salary) return res.status(404).json({ message: "Not found" });
 
   const expense = salary.expenses.id(expenseId);
@@ -91,13 +93,14 @@ const updateExpense = async (req, res) => {
 const deleteExpense = async (req, res) => {
   const { id, expenseId } = req.params;
 
-  const salary = await Salary.findById(id);
+  const salary = await Salary.findOneOwned(req.user.id, id);
   if (!salary) return res.status(404).json({ message: "Not found" });
 
   const expense = salary.expenses.id(expenseId);
   if (!expense) return res.status(404).json({ message: "Expense not found" });
 
-  expense.remove();
+  // (subdocument .remove() no longer exists in Mongoose 9)
+  salary.expenses.pull({ _id: expenseId });
 
   await salary.save();
 

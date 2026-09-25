@@ -3,7 +3,7 @@ const Savings = require("../models/Savings");
 // GET all savings
 const getSavings = async (req, res) => {
   try {
-    const savings = await Savings.find();
+    const savings = await Savings.findOwned(req.user.id);
     res.json(savings);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -15,13 +15,12 @@ const createSavings = async (req, res) => {
   try {
     const { name, initialAmount } = req.body;
 
-    const savings = new Savings({
+    const saved = await Savings.createOwned(req.user.id, {
       name,
       initialAmount,
       transactions: [],
     });
 
-    const saved = await savings.save();
     res.json(saved);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -31,10 +30,9 @@ const createSavings = async (req, res) => {
 // ADD transaction
 const addTransaction = async (req, res) => {
   try {
-    const { id } = req.params;
     const { date, amount, type } = req.body;
 
-    const savings = await Savings.findById(id);
+    const savings = await Savings.findOneOwned(req.user.id, req.params.id);
 
     if (!savings) {
       return res.status(404).json({ error: "Savings not found" });
@@ -52,9 +50,7 @@ const addTransaction = async (req, res) => {
 // DELETE savings
 const deleteSavings = async (req, res) => {
   try {
-    const { id } = req.params;
-
-    const deleted = await Savings.findByIdAndDelete(id);
+    const deleted = await Savings.deleteOwned(req.user.id, req.params.id);
 
     if (!deleted) {
       return res.status(404).json({ error: "Savings not found" });
@@ -70,5 +66,5 @@ module.exports = {
   getSavings,
   createSavings,
   addTransaction,
-   deleteSavings,
+  deleteSavings,
 };

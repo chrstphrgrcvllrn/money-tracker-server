@@ -1,8 +1,11 @@
 const Expense = require("../models/Expense");
+const pick = require("../utils/pick");
+
+const UPDATABLE = ["text", "amount", "category"];
 
 // GET
 const getExpenses = async (req, res) => {
-  const expenses = await Expense.find().sort({ createdAt: -1 });
+  const expenses = await Expense.findOwned(req.user.id).sort({ createdAt: -1 });
   res.json(expenses);
 };
 
@@ -10,7 +13,7 @@ const getExpenses = async (req, res) => {
 const createExpense = async (req, res) => {
   const { text, amount, category } = req.body;
 
-  const expense = await Expense.create({
+  const expense = await Expense.createOwned(req.user.id, {
     text,
     amount,
     category: category || "other",
@@ -22,27 +25,17 @@ const createExpense = async (req, res) => {
 
 // UPDATE
 const updateExpense = async (req, res) => {
-  const updateData = {};
+  const expense = await Expense.updateOwned(req.user.id, req.params.id, {
+    $set: pick(req.body, UPDATABLE),
+  });
 
-  if (req.body.text !== undefined) updateData.text = req.body.text;
-  if (req.body.amount !== undefined) updateData.amount = req.body.amount;
-  if (req.body.category !== undefined) updateData.category = req.body.category;
-
-  const expense = await Expense.findByIdAndUpdate(
-    req.params.id,
-    { $set: updateData },
-    {
-      new: true, // use this OR returnDocument
-      runValidators: true,
-    }
-  );
-
+  if (!expense) return res.status(404).json({ message: "Not found" });
   res.json(expense);
 };
 
 // TOGGLE
 const toggleExpense = async (req, res) => {
-  const expense = await Expense.findById(req.params.id);
+  const expense = await Expense.findOneOwned(req.user.id, req.params.id);
 
   if (!expense) return res.status(404).json({ message: "Not found" });
 
@@ -54,7 +47,9 @@ const toggleExpense = async (req, res) => {
 
 // DELETE
 const deleteExpense = async (req, res) => {
-  await Expense.findByIdAndDelete(req.params.id);
+  const deleted = await Expense.deleteOwned(req.user.id, req.params.id);
+
+  if (!deleted) return res.status(404).json({ message: "Not found" });
   res.json({ message: "Deleted" });
 };
 

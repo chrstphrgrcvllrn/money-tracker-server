@@ -1,8 +1,11 @@
 const HouseExpense = require("../models/HouseExpense");
+const pick = require("../utils/pick");
+
+const UPDATABLE = ["text", "amount", "category", "borrowedBy"];
 
 // GET
 const getHouseExpenses = async (req, res) => {
-  const expenses = await HouseExpense.find().sort({ createdAt: -1 });
+  const expenses = await HouseExpense.findOwned(req.user.id).sort({ createdAt: -1 });
   res.json(expenses);
 };
 
@@ -10,7 +13,7 @@ const getHouseExpenses = async (req, res) => {
 const createHouseExpense = async (req, res) => {
   const { text, amount, category, borrowedBy } = req.body;
 
-  const expense = await HouseExpense.create({
+  const expense = await HouseExpense.createOwned(req.user.id, {
     text,
     amount,
     category: category || "other",
@@ -23,31 +26,19 @@ const createHouseExpense = async (req, res) => {
 
 // UPDATE
 const updateHouseExpense = async (req, res) => {
-  const updateData = {};
+  const expense = await HouseExpense.updateOwned(req.user.id, req.params.id, {
+    $set: pick(req.body, UPDATABLE),
+  });
 
-  if (req.body.text !== undefined) updateData.text = req.body.text;
-  if (req.body.amount !== undefined) updateData.amount = req.body.amount;
-  if (req.body.category !== undefined) updateData.category = req.body.category;
-  if (req.body.borrowedBy !== undefined) updateData.borrowedBy = req.body.borrowedBy;
-
-  const expense = await HouseExpense.findByIdAndUpdate(
-    req.params.id,
-    { $set: updateData },
-    {
-      new: true,
-      runValidators: true,
-    }
-  );
-
+  if (!expense) return res.status(404).json({ message: "Not found" });
   res.json(expense);
 };
 
 // TOGGLE
 const toggleHouseExpense = async (req, res) => {
-  const expense = await HouseExpense.findById(req.params.id);
+  const expense = await HouseExpense.findOneOwned(req.user.id, req.params.id);
 
-  if (!expense)
-    return res.status(404).json({ message: "Not found" });
+  if (!expense) return res.status(404).json({ message: "Not found" });
 
   expense.done = !expense.done;
   await expense.save();
@@ -57,7 +48,9 @@ const toggleHouseExpense = async (req, res) => {
 
 // DELETE
 const deleteHouseExpense = async (req, res) => {
-  await HouseExpense.findByIdAndDelete(req.params.id);
+  const deleted = await HouseExpense.deleteOwned(req.user.id, req.params.id);
+
+  if (!deleted) return res.status(404).json({ message: "Not found" });
   res.json({ message: "Deleted" });
 };
 

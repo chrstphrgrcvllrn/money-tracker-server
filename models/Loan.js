@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const userOwned = require("./plugins/userOwned");
 
 const transactionSchema = new mongoose.Schema(
   {
@@ -24,5 +25,7 @@ const loanSchema = new mongoose.Schema({
   transactions: { type: [transactionSchema], default: [] },
   archived: { type: Boolean, default: false },
 }, { timestamps: true }); // <-- createdAt / updatedAt
+
+loanSchema.plugin(userOwned);
 
 module.exports = mongoose.model("Loan", loanSchema);

@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const userOwned = require("./plugins/userOwned");
 
 const houseExpenseSchema = new mongoose.Schema(
   {
@@ -28,5 +29,7 @@ const houseExpenseSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+houseExpenseSchema.plugin(userOwned);
 
 module.exports = mongoose.model("HouseExpense", houseExpenseSchema);

@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const userOwned = require("./plugins/userOwned");
 
 const paymentSchema = new mongoose.Schema(
   {
@@ -32,5 +33,7 @@ const subscriptionSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+subscriptionSchema.plugin(userOwned);
 
 module.exports = mongoose.model("Subscription", subscriptionSchema);

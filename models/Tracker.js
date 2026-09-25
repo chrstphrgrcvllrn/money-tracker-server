@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const userOwned = require("./plugins/userOwned");
 
 const trackerSchema = new mongoose.Schema(
   {
@@ -16,5 +17,7 @@ const trackerSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+trackerSchema.plugin(userOwned);
 
 module.exports = mongoose.model("Tracker", trackerSchema);

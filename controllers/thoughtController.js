@@ -3,7 +3,7 @@ const Thought = require("../models/Thoughts");
 // GET all
 const getThoughts = async (req, res) => {
   try {
-    const thoughts = await Thought.find().sort({ createdAt: -1 });
+    const thoughts = await Thought.findOwned(req.user.id).sort({ createdAt: -1 });
     res.json(thoughts);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -19,9 +19,7 @@ const createThought = async (req, res) => {
       return res.status(400).json({ message: "Text is required" });
     }
 
-    const newThought = await Thought.create({
-      text,
-    });
+    const newThought = await Thought.createOwned(req.user.id, { text });
 
     res.status(201).json(newThought);
   } catch (err) {

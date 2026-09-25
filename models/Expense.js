@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const userOwned = require("./plugins/userOwned");
 
 const expenseSchema = new mongoose.Schema(
   {
@@ -21,5 +22,7 @@ const expenseSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+expenseSchema.plugin(userOwned);
 
 module.exports = mongoose.model("Expense", expenseSchema);

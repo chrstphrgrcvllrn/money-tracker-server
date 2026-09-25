@@ -1,4 +1,8 @@
+const mongoose = require("mongoose");
 const Subscription = require("../models/Subscription");
+const pick = require("../utils/pick");
+
+const UPDATABLE = ["name", "amount", "quantity", "completed", "notes", "billing", "type", "payments"];
 
 // =========================
 // CREATE SUBSCRIPTION
@@ -7,7 +11,7 @@ const createSubscription = async (req, res) => {
   try {
     const { name, amount, quantity, completed, notes, billing, type } = req.body;
 
-    const subscription = await Subscription.create({
+    const subscription = await Subscription.createOwned(req.user.id, {
       name,
       amount,
       quantity: quantity || 1,
@@ -29,27 +33,24 @@ const createSubscription = async (req, res) => {
 // =========================
 const createPayment = async (req, res) => {
   try {
-    const subId = req.params.id;
     const { date, amount, status } = req.body;
 
-    if (!subId || !date || !amount) {
+    if (!date || !amount) {
       return res.status(400).json({
         message: "subId, date, amount required",
       });
     }
 
-    const sub = await Subscription.findById(subId);
+    const sub = await Subscription.findOneOwned(req.user.id, req.params.id);
     if (!sub) {
       return res.status(404).json({ message: "Subscription not found" });
     }
 
-    const newPayment = {
+    sub.payments.push({
       date: new Date(date),
       amount: Number(amount),
       status: status || "pending",
-    };
-
-    sub.payments.push(newPayment);
+    });
 
     await sub.save();
 
@@ -62,8 +63,8 @@ const createPayment = async (req, res) => {
 // =========================
 // GET
 // =========================
-const getSubscriptions = async (_, res) => {
-  const data = await Subscription.find().sort({ createdAt: -1 });
+const getSubscriptions = async (req, res) => {
+  const data = await Subscription.findOwned(req.user.id).sort({ createdAt: -1 });
   res.json(data);
 };
 
@@ -71,12 +72,11 @@ const getSubscriptions = async (_, res) => {
 // UPDATE SUBSCRIPTION
 // =========================
 const updateSubscription = async (req, res) => {
-  const updated = await Subscription.findByIdAndUpdate(
-    req.params.id,
-    req.body,
-    { new: true }
-  );
+  const updated = await Subscription.updateOwned(req.user.id, req.params.id, {
+    $set: pick(req.body, UPDATABLE),
+  });
 
+  if (!updated) return res.status(404).json({ message: "Not found" });
   res.json(updated);
 };
 
@@ -84,12 +84,16 @@ const updateSubscription = async (req, res) => {
 // DELETE
 // =========================
 const deleteSubscription = async (req, res) => {
-  await Subscription.findByIdAndDelete(req.params.id);
+  const deleted = await Subscription.deleteOwned(req.user.id, req.params.id);
+
+  if (!deleted) return res.status(404).json({ message: "Not found" });
   res.json({ message: "deleted" });
 };
 
 // =========================
 // UPDATE PAYMENT
+// (this route has no :id param — the subscription id arrives in the body,
+// so it is validated and ownership-checked here rather than by router.param)
 // =========================
 const updatePayment = async (req, res) => {
   try {
@@ -101,7 +105,11 @@ const updatePayment = async (req, res) => {
       });
     }
 
-    const sub = await Subscription.findById(subId);
+    if (!mongoose.isValidObjectId(subId)) {
+      return res.status(404).json({ message: "Subscription not found" });
+    }
+
+    const sub = await Subscription.findOneOwned(req.user.id, subId);
     if (!sub) {
       return res.status(404).json({ message: "Subscription not found" });
     }

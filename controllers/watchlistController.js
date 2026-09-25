@@ -1,9 +1,12 @@
 const Watch = require("../models/Watch");
+const pick = require("../utils/pick");
+
+const FIELDS = ["title", "current", "nextRelease", "status", "link"];
 
 // GET ALL
 const getWatchlist = async (req, res) => {
   try {
-    const data = await Watch.find().sort({ createdAt: -1 });
+    const data = await Watch.findOwned(req.user.id).sort({ createdAt: -1 });
     res.json(data);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -13,84 +16,55 @@ const getWatchlist = async (req, res) => {
 // CREATE
 const createWatchItem = async (req, res) => {
   try {
-    const {
-      title,
-      current,
-      nextRelease,
-      status,
-      link, // NEW
-    } = req.body;
+    const { title, current, nextRelease, status, link } = req.body;
 
     if (!title) {
-      return res.status(400).json({
-        message: "Title is required",
-      });
+      return res.status(400).json({ message: "Title is required" });
     }
 
-    const newItem = await Watch.create({
+    const newItem = await Watch.createOwned(req.user.id, {
       title,
       current,
       nextRelease,
       status,
-      link, // NEW
+      link,
     });
 
     res.status(201).json(newItem);
   } catch (err) {
-    res.status(500).json({
-      message: err.message,
-    });
+    res.status(500).json({ message: err.message });
   }
 };
 
 // UPDATE
 const updateWatchItem = async (req, res) => {
   try {
-    const { id } = req.params;
-
-    const updated = await Watch.findByIdAndUpdate(
-      id,
-      {
-        ...req.body,
-      },
-      {
-        new: true,
-        runValidators: true,
-      }
-    );
+    const updated = await Watch.updateOwned(req.user.id, req.params.id, {
+      $set: pick(req.body, FIELDS),
+    });
 
     if (!updated) {
-      return res.status(404).json({
-        message: "Not found",
-      });
+      return res.status(404).json({ message: "Not found" });
     }
 
     res.json(updated);
   } catch (err) {
-    res.status(500).json({
-      message: err.message,
-    });
+    res.status(500).json({ message: err.message });
   }
 };
 
 // DELETE
 const deleteWatchItem = async (req, res) => {
   try {
-    const { id } = req.params;
-
-    const deleted = await Watch.findByIdAndDelete(id);
+    const deleted = await Watch.deleteOwned(req.user.id, req.params.id);
 
     if (!deleted) {
-      return res.status(404).json({
-        message: "Not found",
-      });
+      return res.status(404).json({ message: "Not found" });
     }
 
     res.json(deleted);
   } catch (err) {
-    res.status(500).json({
-      message: err.message,
-    });
+    res.status(500).json({ message: err.message });
   }
 };
 

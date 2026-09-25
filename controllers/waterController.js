@@ -6,10 +6,10 @@ const HISTORY_DAYS = 30;
 // GET the most recent days that have any water logged (newest first)
 const getWaterLogs = async (req, res) => {
   try {
-    const logs = await Water.find().sort({ date: -1 }).limit(HISTORY_DAYS);
+    const logs = await Water.findOwned(req.user.id).sort({ date: -1 }).limit(HISTORY_DAYS);
     res.status(200).json(logs);
   } catch (error) {
-    console.error(error);
+    console.error(error.message);
     res.status(500).json({ message: "Failed to fetch water logs" });
   }
 };
@@ -25,10 +25,12 @@ const adjustWater = async (req, res) => {
       return res.status(400).json({ message: "Invalid date or delta" });
     }
 
+    const userId = Water.toOwnerId(req.user.id);
+
     let log;
     if (delta === 1) {
       log = await Water.findOneAndUpdate(
-        { date },
+        { userId, date },
         { $inc: { glasses: 1 } },
         { upsert: true, returnDocument: "after", setDefaultsOnInsert: true }
       );
@@ -36,16 +38,16 @@ const adjustWater = async (req, res) => {
       // Only decrement when there's something to remove.
       log =
         (await Water.findOneAndUpdate(
-          { date, glasses: { $gt: 0 } },
+          { userId, date, glasses: { $gt: 0 } },
           { $inc: { glasses: -1 } },
           { returnDocument: "after" }
         )) ||
-        (await Water.findOne({ date })) || { date, glasses: 0 };
+        (await Water.findOne({ userId, date })) || { date, glasses: 0 };
     }
 
     res.status(200).json(log);
   } catch (error) {
-    console.error(error);
+    console.error(error.message);
     res.status(500).json({ message: "Failed to update water log" });
   }
 };
