@@ -8,7 +8,7 @@ const serverError = (res, label, error) => {
 // GET all notebook notes
 const getNotebookNotes = async (req, res) => {
   try {
-    const notes = await NotebookNote.findOwned(req.user.id).sort({ updatedAt: -1 });
+    const notes = await NotebookNote.findOwned(req.user.id).sort({ pinned: -1, updatedAt: -1 });
     res.json(notes);
   } catch (error) {
     serverError(res, "Get notebook notes error", error);
@@ -54,7 +54,7 @@ const createNotebookNote = async (req, res) => {
 // UPDATE notebook note
 const updateNotebookNote = async (req, res) => {
   try {
-    const { title, content, status } = req.body;
+    const { title, content, status, pinned } = req.body;
 
     const note = await NotebookNote.findOneOwned(req.user.id, req.params.id);
 
@@ -76,6 +76,10 @@ const updateNotebookNote = async (req, res) => {
       }
 
       note.status = status;
+    }
+
+    if (pinned !== undefined) {
+      note.pinned = !!pinned;
     }
 
     await note.save();
@@ -105,6 +109,25 @@ const toggleNotebookNoteStatus = async (req, res) => {
   }
 };
 
+// TOGGLE pinned
+const toggleNotebookNotePinned = async (req, res) => {
+  try {
+    const note = await NotebookNote.findOneOwned(req.user.id, req.params.id);
+
+    if (!note) {
+      return res.status(404).json({ message: "Note not found" });
+    }
+
+    note.pinned = !note.pinned;
+
+    await note.save();
+
+    res.json(note);
+  } catch (error) {
+    serverError(res, "Toggle notebook note pinned error", error);
+  }
+};
+
 // DELETE notebook note
 const deleteNotebookNote = async (req, res) => {
   try {
@@ -126,5 +149,6 @@ module.exports = {
   createNotebookNote,
   updateNotebookNote,
   toggleNotebookNoteStatus,
+  toggleNotebookNotePinned,
   deleteNotebookNote,
 };

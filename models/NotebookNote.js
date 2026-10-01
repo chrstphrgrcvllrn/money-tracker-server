@@ -19,6 +19,11 @@ const notebookNoteSchema = new mongoose.Schema(
       enum: ["open", "closed"],
       default: "open",
     },
+
+    pinned: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

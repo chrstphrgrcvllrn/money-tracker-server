@@ -6,6 +6,7 @@ const {
   createNotebookNote,
   updateNotebookNote,
   toggleNotebookNoteStatus,
+  toggleNotebookNotePinned,
   deleteNotebookNote,
 } = require("../controllers/notebookController");
 
@@ -18,6 +19,7 @@ router.post("/", createNotebookNote);
 
 router.patch("/:id", updateNotebookNote);
 router.patch("/:id/toggle", toggleNotebookNoteStatus);
+router.patch("/:id/pin", toggleNotebookNotePinned);
 
 router.delete("/:id", deleteNotebookNote);
 

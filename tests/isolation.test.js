@@ -126,6 +126,7 @@ const RESOURCES = [
       { method: "get", path: (c) => `/api/notebook/${c.id}`, ok: 200 },
       { method: "patch", path: (c) => `/api/notebook/${c.id}`, body: { title: "hacked" }, ok: 200 },
       { method: "patch", path: (c) => `/api/notebook/${c.id}/toggle`, ok: 200 },
+      { method: "patch", path: (c) => `/api/notebook/${c.id}/pin`, ok: 200 },
       { method: "delete", path: (c) => `/api/notebook/${c.id}`, ok: 200 },
     ],
   },
