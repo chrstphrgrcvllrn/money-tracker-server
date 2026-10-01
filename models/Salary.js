@@ -17,6 +17,9 @@ const salarySchema = new mongoose.Schema(
 
     salary: { type: Number, required: true },
 
+    // Added on top of salary to form the month's budget (salary + overtime).
+    overtime: { type: Number, default: 0 },
+
     // ✅ prevent undefined crashes
     expenses: {
       type: [expenseSchema],
