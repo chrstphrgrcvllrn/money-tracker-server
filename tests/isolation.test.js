@@ -258,6 +258,58 @@ describe("water (keyed by date, unique per user + date)", () => {
   });
 });
 
+describe("loan transactions can be deleted (e.g. a mis-entry)", () => {
+  test("DELETE a transaction removes only that one, recomputing the loan's balance", async () => {
+    const a = await registerUser(app, "user_a");
+
+    const loan = (await send("post", "/api/loans", a.token, { name: "L", initialAmount: 1000 })).body;
+    await send("post", `/api/loans/${loan._id}/transactions`, a.token, { amount: -100 });
+    const withTx2 = (await send("post", `/api/loans/${loan._id}/transactions`, a.token, { amount: -50 })).body;
+
+    expect(withTx2.transactions).toHaveLength(2);
+    const [tx1, tx2] = withTx2.transactions;
+
+    const afterDelete = await send(
+      "delete",
+      `/api/loans/${loan._id}/transactions/${tx1._id}`,
+      a.token
+    );
+    expect(afterDelete.status).toBe(200);
+    expect(afterDelete.body.transactions).toHaveLength(1);
+    expect(afterDelete.body.transactions[0]._id).toBe(tx2._id);
+
+    const fetched = await send("get", "/api/loans", a.token);
+    expect(fetched.body[0].transactions).toHaveLength(1);
+  });
+
+  test("can't delete another user's transaction (404), and it isn't removed", async () => {
+    const a = await registerUser(app, "user_a");
+    const b = await registerUser(app, "user_b");
+
+    const loan = (await send("post", "/api/loans", a.token, { name: "L", initialAmount: 1000 })).body;
+    const withTx = (await send("post", `/api/loans/${loan._id}/transactions`, a.token, { amount: -100 })).body;
+    const txId = withTx.transactions[0]._id;
+
+    const attack = await send("delete", `/api/loans/${loan._id}/transactions/${txId}`, b.token);
+    expect(attack.status).toBe(404);
+
+    const stillThere = await send("get", "/api/loans", a.token);
+    expect(stillThere.body[0].transactions).toHaveLength(1);
+  });
+
+  test("a non-existent transaction id on your own loan is a 404", async () => {
+    const a = await registerUser(app, "user_a");
+    const loan = (await send("post", "/api/loans", a.token, { name: "L", initialAmount: 1000 })).body;
+
+    const res = await send(
+      "delete",
+      `/api/loans/${loan._id}/transactions/64b7f0f0f0f0f0f0f0f0f0f0`,
+      a.token
+    );
+    expect(res.status).toBe(404);
+  });
+});
+
 describe("subscription payment route with subId in the body", () => {
   test("PATCH /payment can't reach another user's subscription", async () => {
     const a = await registerUser(app, "user_a");

@@ -77,6 +77,7 @@ const createApp = () => {
     if (!configuredRouters.has(router)) {
       router.param("id", validateObjectId);
       router.param("expenseId", validateObjectId);
+      router.param("transactionId", validateObjectId);
       configuredRouters.add(router);
     }
     app.use(path, requireAuth, router);

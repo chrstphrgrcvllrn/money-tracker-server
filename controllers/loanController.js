@@ -70,10 +70,37 @@ const addTransaction = async (req, res) => {
 
     await loan.save();
 
-    res.status(201).json(transaction);
+    // The whole loan (not just the pushed transaction) so the client gets the
+    // real _id Mongoose assigned to it — needed to delete that entry later.
+    res.status(201).json(loan);
   } catch (error) {
     console.error("ADD TRANSACTION ERROR:", error.message);
     res.status(500).json({ message: "Failed to add transaction" });
+  }
+};
+
+// DELETE one transaction from a loan (e.g. a mis-entered payment)
+const deleteTransaction = async (req, res) => {
+  try {
+    const { id, transactionId } = req.params;
+
+    const loan = await Loan.findOneOwned(req.user.id, id);
+    if (!loan) {
+      return res.status(404).json({ message: "Loan not found" });
+    }
+
+    const transaction = loan.transactions.id(transactionId);
+    if (!transaction) {
+      return res.status(404).json({ message: "Transaction not found" });
+    }
+
+    loan.transactions.pull({ _id: transactionId });
+    await loan.save();
+
+    res.status(200).json(loan);
+  } catch (error) {
+    console.error("DELETE TRANSACTION ERROR:", error.message);
+    res.status(500).json({ message: "Failed to delete transaction" });
   }
 };
 
@@ -103,5 +130,6 @@ module.exports = {
   getLoans,
   createLoan,
   addTransaction,
+  deleteTransaction,
   updateLoan,
 };
