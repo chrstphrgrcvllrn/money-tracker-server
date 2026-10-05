@@ -1,7 +1,7 @@
 const Salary = require("../models/Salary");
 const pick = require("../utils/pick");
 
-const SALARY_UPDATABLE = ["date", "salary", "overtime", "expenses"];
+const SALARY_UPDATABLE = ["date", "salary", "overtime", "adjustment", "expenses"];
 const EXPENSE_FIELDS = ["name", "amount", "paid"];
 
 // GET all salaries
