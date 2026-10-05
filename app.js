@@ -23,6 +23,7 @@ const houseExpenseRoutes = require("./routes/houseExpenseRoutes");
 const notebookRoutes = require("./routes/notebookRoutes");
 const trackerRoutes = require("./routes/trackerRoutes");
 const waterRoutes = require("./routes/waterRoutes");
+const otPayRoutes = require("./routes/otPayRoutes");
 
 // Every user-data router is mounted behind requireAuth HERE, once, rather than
 // inside each router file, so a new data route can't be left public by accident.
@@ -41,6 +42,7 @@ const DATA_ROUTES = [
   ["/api/notebook", notebookRoutes],
   ["/api/tracker", trackerRoutes],
   ["/api/water", waterRoutes],
+  ["/api/ot-pay", otPayRoutes],
 ];
 
 // Routers are module singletons; register their param handlers only once even
