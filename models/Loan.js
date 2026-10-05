@@ -15,6 +15,12 @@ const transactionSchema = new mongoose.Schema(
       type: String,
       default: "payment", // "payment" | "deduction"
     },
+    // Free-text reminder for this entry (where it went, a reference no., etc.).
+    notes: {
+      type: String,
+      default: "",
+      maxlength: 500,
+    },
   },
   // { _id: false }
 );

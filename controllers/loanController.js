@@ -35,7 +35,7 @@ const createLoan = async (req, res) => {
 
 const addTransaction = async (req, res) => {
   try {
-    const { date, amount, type } = req.body;
+    const { date, amount, type, notes } = req.body;
 
     if (amount === undefined) {
       return res.status(400).json({ message: "Amount is required" });
@@ -66,6 +66,7 @@ const addTransaction = async (req, res) => {
       date: new Date(transaction.date), // ensures proper Date type
       amount: transaction.amount,
       type: transaction.type,
+      notes: typeof notes === "string" ? notes.trim().slice(0, 500) : "",
     });
 
     await loan.save();
@@ -126,10 +127,49 @@ const updateLoan = async (req, res) => {
   }
 };
 
+// DELETE a whole loan (and its payments with it). Owner-scoped: someone else's
+// loan id comes back as 404, the same as a missing one.
+const deleteLoan = async (req, res) => {
+  try {
+    const deleted = await Loan.deleteOwned(req.user.id, req.params.id);
+    if (!deleted) return res.status(404).json({ message: "Loan not found" });
+    res.json({ message: "Deleted" });
+  } catch (err) {
+    console.error("DELETE LOAN ERROR:", err.message);
+    res.status(500).json({ message: "Failed to delete loan" });
+  }
+};
+
+// UPDATE the notes on one existing transaction
+const updateTransactionNotes = async (req, res) => {
+  try {
+    const { id, transactionId } = req.params;
+    const { notes } = req.body;
+    if (typeof notes !== "string") {
+      return res.status(400).json({ message: "Notes must be text" });
+    }
+
+    const loan = await Loan.findOneOwned(req.user.id, id);
+    if (!loan) return res.status(404).json({ message: "Loan not found" });
+
+    const transaction = loan.transactions.id(transactionId);
+    if (!transaction) return res.status(404).json({ message: "Entry not found" });
+
+    transaction.notes = notes.trim().slice(0, 500);
+    await loan.save();
+    res.json(loan);
+  } catch (error) {
+    console.error("UPDATE TRANSACTION NOTES ERROR:", error.message);
+    res.status(500).json({ message: "Failed to update notes" });
+  }
+};
+
 module.exports = {
+  updateTransactionNotes,
   getLoans,
   createLoan,
   addTransaction,
   deleteTransaction,
   updateLoan,
+  deleteLoan,
 };

@@ -5,6 +5,8 @@ const {
   addTransaction,
   deleteTransaction,
   updateLoan,
+  deleteLoan,
+  updateTransactionNotes,
 } = require("../controllers/loanController");
 
 const router = express.Router();
@@ -12,9 +14,11 @@ const router = express.Router();
 router.get("/", getLoans);
 router.post("/", createLoan);
 router.put("/:id", updateLoan);
+router.delete("/:id", deleteLoan);
 
 router.post("/:id/transactions", addTransaction);
 router.delete("/:id/transactions/:transactionId", deleteTransaction);
+router.patch("/:id/transactions/:transactionId", updateTransactionNotes);
 
 module.exports = router;
 
