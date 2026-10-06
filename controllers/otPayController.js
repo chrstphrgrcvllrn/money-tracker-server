@@ -13,7 +13,7 @@ const getOtPay = async (req, res) => {
 // Replaces the whole OT state (settings, holidays, entries) in one save.
 const saveOtPay = async (req, res) => {
   try {
-    const { settings, holidays, entries, cutoffs } = req.body;
+    const { settings, holidays, entries, cutoffs, cutoffRules } = req.body;
     const doc = await OtPay.findOneAndUpdate(
       { userId: OtPay.toOwnerId(req.user.id) },
       {
@@ -22,6 +22,7 @@ const saveOtPay = async (req, res) => {
           ...(holidays !== undefined && { holidays }),
           ...(entries !== undefined && { entries }),
           ...(cutoffs !== undefined && { cutoffs }),
+          ...(cutoffRules !== undefined && { cutoffRules }),
         },
         $setOnInsert: { userId: OtPay.toOwnerId(req.user.id) },
       },

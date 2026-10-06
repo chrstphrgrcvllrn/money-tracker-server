@@ -12,6 +12,16 @@ const holidaySchema = new mongoose.Schema(
   { _id: false }
 );
 
+// A date range whose shifts are placed automatically in one cutoff.
+const cutoffRuleSchema = new mongoose.Schema(
+  {
+    from: { type: String, required: true }, // "YYYY-MM-DD", inclusive
+    to: { type: String, required: true }, // "YYYY-MM-DD", inclusive
+    cutoff: { type: String, required: true },
+  },
+  { _id: false }
+);
+
 const entrySchema = new mongoose.Schema(
   {
     id: { type: String, required: true },
@@ -40,6 +50,8 @@ const otPaySchema = new mongoose.Schema(
     entries: { type: [entrySchema], default: [] },
     // Named pay cutoffs that entries can be placed in.
     cutoffs: { type: [String], default: [] },
+    // Automatic placement: a shift's start date picks the cutoff of the rule covering it.
+    cutoffRules: { type: [cutoffRuleSchema], default: [] },
   },
   { timestamps: true }
 );
