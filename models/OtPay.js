@@ -22,6 +22,18 @@ const cutoffRuleSchema = new mongoose.Schema(
   { _id: false }
 );
 
+// A labeled amount added to one cutoff (e.g. a payroll difference that the shift
+// times don't explain). `tax` is the actual withholding from the payslip, if known.
+const cutoffAdjustmentSchema = new mongoose.Schema(
+  {
+    cutoff: { type: String, required: true },
+    label: { type: String, default: "" },
+    gross: { type: Number, required: true },
+    tax: { type: Number },
+  },
+  { _id: false }
+);
+
 const entrySchema = new mongoose.Schema(
   {
     id: { type: String, required: true },
@@ -52,6 +64,7 @@ const otPaySchema = new mongoose.Schema(
     cutoffs: { type: [String], default: [] },
     // Automatic placement: a shift's start date picks the cutoff of the rule covering it.
     cutoffRules: { type: [cutoffRuleSchema], default: [] },
+    cutoffAdjustments: { type: [cutoffAdjustmentSchema], default: [] },
   },
   { timestamps: true }
 );
