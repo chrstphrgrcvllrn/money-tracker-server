@@ -45,6 +45,8 @@ const entrySchema = new mongoose.Schema(
     actualPaid: { type: Number, min: 0 },
     // Manual cutoff override. Absent = automatic (from the date rules); "" = no cutoff.
     cutoff: { type: String },
+    // Manual day-type tag. Absent = automatic (from the holiday table, else regular).
+    dayType: { type: String, enum: ["regular", "special", "regular_holiday"] },
   },
   { _id: false }
 );
