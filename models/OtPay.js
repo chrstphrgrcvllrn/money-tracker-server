@@ -31,8 +31,8 @@ const entrySchema = new mongoose.Schema(
     breakMinutes: { type: Number, min: 0, default: 60 },
     hoursFiled: { type: Number, min: 0, default: 0 },
     actualPaid: { type: Number, min: 0 },
-    // Which pay cutoff this shift is placed in (a label from the cutoffs list).
-    cutoff: { type: String, default: "" },
+    // Manual cutoff override. Absent = automatic (from the date rules); "" = no cutoff.
+    cutoff: { type: String },
   },
   { _id: false }
 );
