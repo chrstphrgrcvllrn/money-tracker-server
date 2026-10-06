@@ -21,6 +21,8 @@ const entrySchema = new mongoose.Schema(
     breakMinutes: { type: Number, min: 0, default: 60 },
     hoursFiled: { type: Number, min: 0, default: 0 },
     actualPaid: { type: Number, min: 0 },
+    // Which pay cutoff this shift is placed in (a label from the cutoffs list).
+    cutoff: { type: String, default: "" },
   },
   { _id: false }
 );
@@ -36,6 +38,8 @@ const otPaySchema = new mongoose.Schema(
     },
     holidays: { type: [holidaySchema], default: [] },
     entries: { type: [entrySchema], default: [] },
+    // Named pay cutoffs that entries can be placed in.
+    cutoffs: { type: [String], default: [] },
   },
   { timestamps: true }
 );
