@@ -19,6 +19,11 @@ const placeSchema = new mongoose.Schema(
     // needed — "Open in Maps" just does a text search.
     location: { type: String, default: "", trim: true },
 
+    // Optional precise Google Maps link (e.g. a share link from the Maps app).
+    // When present, "Open in Maps" uses this instead of a text search built
+    // from `location`.
+    mapLink: { type: String, default: "", trim: true, maxlength: 2000 },
+
     details: { type: String, default: "" },
 
     images: {
