@@ -26,6 +26,9 @@ const placeSchema = new mongoose.Schema(
 
     details: { type: String, default: "" },
 
+    // Free text: standout dishes/items at this place, if any.
+    specialty: { type: String, default: "", maxlength: 1000 },
+
     images: {
       type: [String],
       default: [],
