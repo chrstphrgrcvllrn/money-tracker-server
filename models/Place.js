@@ -7,6 +7,8 @@ const userOwned = require("./plugins/userOwned");
 // the size caps below keep a place document well under Mongo's 16MB limit.
 const MAX_IMAGES = 6;
 const MAX_IMAGE_LENGTH = 600_000; // ~450KB of binary once decoded
+const MAX_LINKS = 10;
+const MAX_LINK_LENGTH = 2000;
 
 const placeSchema = new mongoose.Schema(
   {
@@ -30,6 +32,25 @@ const placeSchema = new mongoose.Schema(
         {
           validator: (arr) => arr.every((s) => typeof s === "string" && s.length <= MAX_IMAGE_LENGTH),
           message: "Each image must be a reasonably small, resized image",
+        },
+      ],
+    },
+
+    // Video links (TikTok, YouTube, etc.), rendered as buttons on the client.
+    // Opening one just follows the URL — the TikTok/YouTube apps intercept
+    // their own domains via Universal/App Links on a phone, so no custom
+    // deep-link scheme is needed here.
+    links: {
+      type: [String],
+      default: [],
+      validate: [
+        {
+          validator: (arr) => arr.length <= MAX_LINKS,
+          message: `A place can have at most ${MAX_LINKS} links`,
+        },
+        {
+          validator: (arr) => arr.every((s) => typeof s === "string" && s.length <= MAX_LINK_LENGTH && /^https?:\/\//.test(s)),
+          message: "Each link must be a valid http(s) URL",
         },
       ],
     },
