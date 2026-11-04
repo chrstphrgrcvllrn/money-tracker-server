@@ -28,6 +28,12 @@ const RESOURCES = [
     ],
   },
   {
+    name: "places",
+    base: "/api/places",
+    create: { title: "Secret Spot", location: "nowhere", details: "shh" },
+    ops: [{ method: "put", path: (c) => `/api/places/${c.id}`, body: { title: "hacked" }, ok: 200 }],
+  },
+  {
     name: "loans",
     base: "/api/loans",
     create: { name: "Secret Loan", initialAmount: 500 },

@@ -1,0 +1,42 @@
+const mongoose = require("mongoose");
+const userOwned = require("./plugins/userOwned");
+
+// Images are stored as base64 data URLs (resized/compressed client-side
+// before upload, see lib/image resize on the client). No object storage is
+// configured for this app, so this keeps everything self-contained in Mongo;
+// the size caps below keep a place document well under Mongo's 16MB limit.
+const MAX_IMAGES = 6;
+const MAX_IMAGE_LENGTH = 600_000; // ~450KB of binary once decoded
+
+const placeSchema = new mongoose.Schema(
+  {
+    title: { type: String, required: true, trim: true },
+
+    // Free text ("123 Rizal St, Makati" or "that ramen place near work").
+    // Kept as text rather than coordinates so no geocoding/maps API key is
+    // needed — "Open in Maps" just does a text search.
+    location: { type: String, default: "", trim: true },
+
+    details: { type: String, default: "" },
+
+    images: {
+      type: [String],
+      default: [],
+      validate: [
+        {
+          validator: (arr) => arr.length <= MAX_IMAGES,
+          message: `A place can have at most ${MAX_IMAGES} images`,
+        },
+        {
+          validator: (arr) => arr.every((s) => typeof s === "string" && s.length <= MAX_IMAGE_LENGTH),
+          message: "Each image must be a reasonably small, resized image",
+        },
+      ],
+    },
+  },
+  { timestamps: true }
+);
+
+placeSchema.plugin(userOwned);
+
+module.exports = mongoose.model("Place", placeSchema);
