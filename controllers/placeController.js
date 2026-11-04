@@ -18,7 +18,7 @@ const getPlaces = async (req, res) => {
 // CREATE a place
 const createPlace = async (req, res) => {
   try {
-    const { title, location, details, images, links, mapLink, specialty } = req.body;
+    const { title, location, details, images, foodImages, links, mapLink, specialty } = req.body;
 
     if (!title?.trim()) {
       return res.status(400).json({ message: "Title is required" });
@@ -31,6 +31,7 @@ const createPlace = async (req, res) => {
       specialty: specialty || "",
       details: details || "",
       images: Array.isArray(images) ? images : [],
+      foodImages: Array.isArray(foodImages) ? foodImages : [],
       links: Array.isArray(links) ? links : [],
     });
 
@@ -46,7 +47,7 @@ const createPlace = async (req, res) => {
 // UPDATE a place
 const updatePlace = async (req, res) => {
   try {
-    const { title, location, details, images, links, mapLink, specialty } = req.body;
+    const { title, location, details, images, foodImages, links, mapLink, specialty } = req.body;
     const update = {};
     if (title !== undefined) update.title = title.trim();
     if (location !== undefined) update.location = location.trim();
@@ -54,6 +55,7 @@ const updatePlace = async (req, res) => {
     if (specialty !== undefined) update.specialty = specialty;
     if (details !== undefined) update.details = details;
     if (images !== undefined) update.images = images;
+    if (foodImages !== undefined) update.foodImages = foodImages;
     if (links !== undefined) update.links = links;
 
     const place = await Place.updateOwned(req.user.id, req.params.id, { $set: update });

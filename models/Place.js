@@ -44,6 +44,23 @@ const placeSchema = new mongoose.Schema(
       ],
     },
 
+    // Separate gallery for photos of the `specialty` dishes/items, kept apart
+    // from the place's own `images` (exterior/general shots).
+    foodImages: {
+      type: [String],
+      default: [],
+      validate: [
+        {
+          validator: (arr) => arr.length <= MAX_IMAGES,
+          message: `A place can have at most ${MAX_IMAGES} food images`,
+        },
+        {
+          validator: (arr) => arr.every((s) => typeof s === "string" && s.length <= MAX_IMAGE_LENGTH),
+          message: "Each food image must be a reasonably small, resized image",
+        },
+      ],
+    },
+
     // Video links (TikTok, YouTube, etc.), rendered as buttons on the client.
     // Opening one just follows the URL — the TikTok/YouTube apps intercept
     // their own domains via Universal/App Links on a phone, so no custom
