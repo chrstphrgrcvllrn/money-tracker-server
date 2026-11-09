@@ -1,7 +1,7 @@
 const Salary = require("../models/Salary");
 const pick = require("../utils/pick");
 
-const SALARY_UPDATABLE = ["date", "salary", "overtime", "adjustment", "expenses"];
+const SALARY_UPDATABLE = ["date", "salary", "overtime", "adjustment", "extras", "expenses"];
 const EXPENSE_FIELDS = ["name", "amount", "paid", "note", "category"];
 
 // GET all salaries
@@ -13,7 +13,7 @@ const getSalaries = async (req, res) => {
 // CREATE salary (with optional expenses)
 const createSalary = async (req, res) => {
   try {
-    const { date, salary, overtime, expenses } = req.body;
+    const { date, salary, overtime, extras, expenses } = req.body;
 
     if (!date || salary === undefined) {
       return res.status(400).json({ message: "Date and salary are required" });
@@ -23,6 +23,7 @@ const createSalary = async (req, res) => {
       date,
       salary,
       overtime: Number(overtime) || 0,
+      extras: Array.isArray(extras) ? extras : [],
       expenses: Array.isArray(expenses) ? expenses : [], // ✅ safe fallback
     });
 

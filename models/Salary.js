@@ -12,6 +12,15 @@ const expenseSchema = new mongoose.Schema(
   { _id: true }
 );
 
+// Custom income lines on top of salary (e.g. "13th month"); added to the budget.
+const extraSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true, trim: true },
+    amount: { type: Number, required: true },
+  },
+  { _id: true }
+);
+
 const salarySchema = new mongoose.Schema(
   {
     // ✅ match frontend
@@ -24,6 +33,8 @@ const salarySchema = new mongoose.Schema(
 
     // Reimbursements for mis-tagged absences; also added to the month's budget.
     adjustment: { type: Number, default: 0 },
+
+    extras: { type: [extraSchema], default: [] },
 
     // ✅ prevent undefined crashes
     expenses: {
