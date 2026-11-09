@@ -50,7 +50,8 @@ const spotSchema = new mongoose.Schema({
     ],
   },
   mapLink: { type: String, default: "", trim: true, maxlength: 2000 },
-  notes: { type: String, default: "", maxlength: 3000 },
+  notes: { type: String, default: "", maxlength: 3000 }, // shown as "Things to know"
+  activities: { type: String, default: "", maxlength: 3000 },
   whereToEat: { type: String, default: "", maxlength: 2000 },
   hotel: { type: String, default: "", maxlength: 2000 },
 });
