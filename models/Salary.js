@@ -7,6 +7,7 @@ const expenseSchema = new mongoose.Schema(
     amount: { type: Number, required: true },
     paid: { type: Boolean, default: false },
     note: { type: String, trim: true, default: "" },
+    category: { type: String, trim: true, default: "" },
   },
   { _id: true }
 );

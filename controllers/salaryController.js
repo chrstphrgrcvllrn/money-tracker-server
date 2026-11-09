@@ -2,7 +2,7 @@ const Salary = require("../models/Salary");
 const pick = require("../utils/pick");
 
 const SALARY_UPDATABLE = ["date", "salary", "overtime", "adjustment", "expenses"];
-const EXPENSE_FIELDS = ["name", "amount", "paid", "note"];
+const EXPENSE_FIELDS = ["name", "amount", "paid", "note", "category"];
 
 // GET all salaries
 const getSalaries = async (req, res) => {
