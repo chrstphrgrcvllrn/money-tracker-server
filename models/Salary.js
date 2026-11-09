@@ -6,6 +6,7 @@ const expenseSchema = new mongoose.Schema(
     name: { type: String, required: true },
     amount: { type: Number, required: true },
     paid: { type: Boolean, default: false },
+    note: { type: String, trim: true, default: "" },
   },
   { _id: true }
 );
