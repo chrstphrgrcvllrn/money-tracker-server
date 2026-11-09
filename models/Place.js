@@ -29,6 +29,10 @@ const placeSchema = new mongoose.Schema(
     // Free text: standout dishes/items at this place, if any.
     specialty: { type: String, default: "", maxlength: 1000 },
 
+    // Free text: tips/warnings worth knowing before going (e.g. "cash only",
+    // "closed Mondays", "bring ID").
+    thingsToKnow: { type: String, default: "", maxlength: 2000 },
+
     images: {
       type: [String],
       default: [],

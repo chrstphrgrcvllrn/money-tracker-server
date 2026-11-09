@@ -38,7 +38,7 @@ test("discovers every data route (sanity check on the discovery itself)", () => 
     [
       "/api/bills", "/api/calendar-events", "/api/expenses", "/api/house-expenses", "/api/loans",
       "/api/notebook", "/api/notes", "/api/ot-pay", "/api/places", "/api/salary", "/api/savings", "/api/subscription",
-      "/api/thoughts", "/api/tracker", "/api/water", "/api/watchlist",
+      "/api/thoughts", "/api/tracker", "/api/trips", "/api/water", "/api/watchlist",
     ].sort()
   );
 });

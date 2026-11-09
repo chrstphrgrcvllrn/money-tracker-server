@@ -34,6 +34,12 @@ const RESOURCES = [
     ops: [{ method: "put", path: (c) => `/api/places/${c.id}`, body: { title: "hacked" }, ok: 200 }],
   },
   {
+    name: "trips",
+    base: "/api/trips",
+    create: { title: "Secret Trip", days: [{ label: "Day 1", placeIds: [] }] },
+    ops: [{ method: "put", path: (c) => `/api/trips/${c.id}`, body: { title: "hacked" }, ok: 200 }],
+  },
+  {
     name: "loans",
     base: "/api/loans",
     create: { name: "Secret Loan", initialAmount: 500 },
