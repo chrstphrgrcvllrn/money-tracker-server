@@ -10,6 +10,50 @@ const MAX_IMAGE_LENGTH = 600_000; // ~450KB of binary once decoded
 const MAX_LINKS = 10;
 const MAX_LINK_LENGTH = 2000;
 
+const MAX_SPOTS = 15;
+const MAX_SPOT_IMAGES = 4;
+// Whole-document guard: spots hold images too, so cap their combined size well
+// under Mongo's 16MB document limit.
+const MAX_SPOT_IMAGES_TOTAL_LENGTH = 8_000_000;
+
+// A named sub-location inside a place (e.g. "Mount Fansipan" inside "Sapa,
+// Vietnam"), with its own media and practical notes.
+const spotSchema = new mongoose.Schema({
+  name: { type: String, required: true, trim: true, maxlength: 200 },
+  images: {
+    type: [String],
+    default: [],
+    validate: [
+      {
+        validator: (arr) => arr.length <= MAX_SPOT_IMAGES,
+        message: `A spot can have at most ${MAX_SPOT_IMAGES} images`,
+      },
+      {
+        validator: (arr) => arr.every((s) => typeof s === "string" && s.length <= MAX_IMAGE_LENGTH),
+        message: "Each spot image must be a reasonably small, resized image",
+      },
+    ],
+  },
+  links: {
+    type: [String],
+    default: [],
+    validate: [
+      {
+        validator: (arr) => arr.length <= MAX_LINKS,
+        message: `A spot can have at most ${MAX_LINKS} links`,
+      },
+      {
+        validator: (arr) => arr.every((s) => typeof s === "string" && s.length <= MAX_LINK_LENGTH && /^https?:\/\//.test(s)),
+        message: "Each spot link must be a valid http(s) URL",
+      },
+    ],
+  },
+  mapLink: { type: String, default: "", trim: true, maxlength: 2000 },
+  notes: { type: String, default: "", maxlength: 3000 },
+  whereToEat: { type: String, default: "", maxlength: 2000 },
+  hotel: { type: String, default: "", maxlength: 2000 },
+});
+
 const placeSchema = new mongoose.Schema(
   {
     title: { type: String, required: true, trim: true },
@@ -80,6 +124,24 @@ const placeSchema = new mongoose.Schema(
         {
           validator: (arr) => arr.every((s) => typeof s === "string" && s.length <= MAX_LINK_LENGTH && /^https?:\/\//.test(s)),
           message: "Each link must be a valid http(s) URL",
+        },
+      ],
+    },
+
+    // Sub-locations within this place, each with its own sections.
+    spots: {
+      type: [spotSchema],
+      default: [],
+      validate: [
+        {
+          validator: (arr) => arr.length <= MAX_SPOTS,
+          message: `A place can have at most ${MAX_SPOTS} spots`,
+        },
+        {
+          validator: (arr) =>
+            arr.reduce((sum, spot) => sum + (spot.images || []).reduce((n, img) => n + img.length, 0), 0) <=
+            MAX_SPOT_IMAGES_TOTAL_LENGTH,
+          message: "Spot images are too large in total — remove some or use smaller ones",
         },
       ],
     },
