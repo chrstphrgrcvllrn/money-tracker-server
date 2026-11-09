@@ -10,6 +10,7 @@ const MAX_IMAGE_LENGTH = 600_000; // ~450KB of binary once decoded
 const MAX_LINKS = 10;
 const MAX_LINK_LENGTH = 2000;
 
+const MAX_SUBPLACES = 15;
 const MAX_SPOTS = 15;
 const MAX_SPOT_IMAGES = 4;
 // Whole-document guard: spots hold images too, so cap their combined size well
@@ -52,6 +53,21 @@ const spotSchema = new mongoose.Schema({
   notes: { type: String, default: "", maxlength: 3000 },
   whereToEat: { type: String, default: "", maxlength: 2000 },
   hotel: { type: String, default: "", maxlength: 2000 },
+});
+
+// A place inside the country (e.g. "Sapa" inside "Vietnam"), grouping its spots.
+const subPlaceSchema = new mongoose.Schema({
+  name: { type: String, required: true, trim: true, maxlength: 200 },
+  spots: {
+    type: [spotSchema],
+    default: [],
+    validate: [
+      {
+        validator: (arr) => arr.length <= MAX_SPOTS,
+        message: `A place can have at most ${MAX_SPOTS} spots`,
+      },
+    ],
+  },
 });
 
 const placeSchema = new mongoose.Schema(
@@ -128,19 +144,27 @@ const placeSchema = new mongoose.Schema(
       ],
     },
 
-    // Sub-locations within this place, each with its own sections.
-    spots: {
-      type: [spotSchema],
+    // Legacy: spots used to hang directly off a place. Kept so old data isn't
+    // lost; the client folds them into a sub-place on next edit.
+    spots: { type: [spotSchema], default: [] },
+
+    // Places inside this one (this is a country-level entry), each with spots.
+    subPlaces: {
+      type: [subPlaceSchema],
       default: [],
       validate: [
         {
-          validator: (arr) => arr.length <= MAX_SPOTS,
-          message: `A place can have at most ${MAX_SPOTS} spots`,
+          validator: (arr) => arr.length <= MAX_SUBPLACES,
+          message: `A place can have at most ${MAX_SUBPLACES} sub-places`,
         },
         {
           validator: (arr) =>
-            arr.reduce((sum, spot) => sum + (spot.images || []).reduce((n, img) => n + img.length, 0), 0) <=
-            MAX_SPOT_IMAGES_TOTAL_LENGTH,
+            arr.reduce(
+              (sum, sp) =>
+                sum +
+                (sp.spots || []).reduce((n, spot) => n + (spot.images || []).reduce((m, img) => m + img.length, 0), 0),
+              0
+            ) <= MAX_SPOT_IMAGES_TOTAL_LENGTH,
           message: "Spot images are too large in total — remove some or use smaller ones",
         },
       ],
